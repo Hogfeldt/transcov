@@ -10,7 +10,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     #test_suite="test",
-    install_requires=[],
+    install_requires=['pysam'],
     entry_points={
          'console_scripts': ['transcov = transcov.cli:start'],
     },
