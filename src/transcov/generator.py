@@ -1,8 +1,8 @@
-import argparse
-from tss import TranscriptionStartSite
-from bam import BAM
 import numpy as np
 import csv
+
+from .bam import BAM
+from .tss import TranscriptionStartSite
 
 
 def load_transcription_start_sites(input_file):
@@ -57,30 +57,3 @@ def main(annotation_file, bam_file, k, output_file, whole_fragment):
             else:
                 add_read_ends(coverage_matrix, rel_start, rel_end, i, k)
     np.save(output_file, coverage_matrix)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Script for creating a data structure containing the coverage relative to TSS, given a set og bam files, for all transcript in gencode annotation"
-    )
-    parser.add_argument(
-        "annotation_file", help="File path to the gencode annotation file"
-    )
-    parser.add_argument(
-        "bam_file",
-        help="File path to a file containing paths to all the bam file which should be read from",
-    )
-    parser.add_argument(
-        "-k",
-        dest="k",
-        default=5000,
-        help="The range in bp that defines the region of interest. The region is +-2k bp with the TSS in the center",
-    )
-    parser.add_argument(
-        "output_file", help="The file path to where the output data should be stored"
-    )
-    parser.add_argument(
-        "--whole-fragment", action="store_true", help="Add one for every bp between readends"
-    )
-    args = parser.parse_args()
-    main(args.annotation_file, args.bam_file, int(args.k), args.output_file, args.whole_fragment)
