@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/transcov/badge/?version=latest)](https://transcov.readthedocs.io/en/latest/?badge=latest)
+
 # transcov
 A bioinformatics software for mapping coverage around transcription start sites
 
