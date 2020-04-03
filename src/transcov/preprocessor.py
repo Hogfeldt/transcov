@@ -45,7 +45,7 @@ def preprocess(input_file, output_file):
         and determine the Transcription Start Site (TSS) for the transcript.
         Information about the TSS will be stored in the output file.
 
-        Assumtion:
+        Assumption:
         Two transcripts can have the same TSS (ref: https://academic.oup.com/nar/article/46/2/582/4675314)
         therefor transcripts and TSS' will not be mapped one-to-one, but the first
         transcript with a given TSS will be the one recorded
