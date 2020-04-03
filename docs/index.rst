@@ -17,6 +17,10 @@ Transcov will help you with the following:
 
 * Explore coverage around TSS'.
 
+.. warning::
+    The documentation is still under construction, so a lot of information must be missing. 
+    I hope to have the basic documentation up and running soon
+
 .. toctree::
     :maxdepth: 2
     :caption: Contents:
