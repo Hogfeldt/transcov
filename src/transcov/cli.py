@@ -29,4 +29,4 @@ def generate(bam_file, tss_file, region_size, output_file):
 @click.option('--uint32', is_flag=True)
 def collapse(matrices, output_file, uint32):
     if len(matrices) > 0:
-        collapse_matrices(annotation_file, output_file, uint32)
+        collapse_matrices(matrices, output_file, uint32)
