@@ -10,7 +10,7 @@ def load_transcription_start_sites(input_file):
     with open(input_file) as fp:
         tsv_reader = csv.reader(fp, delimiter=" ")
         for line in tsv_reader:
-            tss = TranscriptionStartSite(line[0], line[1], int(line[2]), line[3], line[4], line[5])
+            tss = TranscriptionStartSite(line[0], line[1], int(line[2]), line[3], line[4], line[5], line[6])
             TSSs.append(tss)
     return TSSs
 
