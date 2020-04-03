@@ -41,10 +41,33 @@ def add_fragment(A, start, end, i, k):
     v[a:b] = 1
     A[i] += v
 
-def generate_coverage_matrix(bam_file, annotation_file, region_size, output_file, whole_fragment=False):
-    """ API docstring! """
+def generate_coverage_matrix(bam_file, tss_file, region_size, output_file, whole_fragment=False):
+    """ This function will iterate over the TSS' in the tss file, and fetch
+        all fragments from the bam file, in a region of the size defined by region_size. 
+        The TSS will be the center of the region.
+        For each tss the index of an array represents base pair position relative 
+        to the TSS, and the value 1 is added to each index of the array, where a 
+        fragment or the ends of the fragments are positioned.
+        This gives a histogram of coverage around the TSS for each TSS.
+        All the arrays are then composed in a matrix so that rows represents
+        TSS' and columns represents a positions relative to the TSS.
+        Values are read-depth/coverage for either fragments or end-pairs
+
+
+        :param bam_file: File path to the bam sample file
+        :type bam_file: str
+        :param tss_file: File path to the tss file, compiled by the preprocessing function
+        :type tss_file: str
+        :param region_size: Size og the region to inspect where the TSS is in the center of the region
+        :type region_size: positive int
+        :param output_file: File path to the output file
+        :type output_file: str
+        :param whole_fragment: If False add only end pairs if True add the whole fragment
+        :type output_file: boolean
+        :returns:  None
+    """
     k = int(region_size / 2)
-    tss_list = load_transcription_start_sites(annotation_file)
+    tss_list = load_transcription_start_sites(tss_file)
     coverage_matrix = np.zeros((len(tss_list), 2 * k + 1), dtype=np.uint16)
     for i, tss in enumerate(tss_list):
         bam = BAM(bam_file)

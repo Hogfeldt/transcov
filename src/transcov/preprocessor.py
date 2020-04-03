@@ -50,10 +50,10 @@ def preprocess(input_file, output_file):
         therefor transcripts and TSS' will not be mapped one-to-one, but the first
         transcript with a given TSS will be the one recorded
 
-        :param input_file: File path to the gencode annotation file.
-        :type input_file: str.
-        :param output_file: File path to the output file.
-        :type output_file: str.
+        :param input_file: File path to the gencode annotation file
+        :type input_file: str
+        :param output_file: File path to the output file
+        :type output_file: str
         :returns:  None
     """
     tx_annotations = get_transcript_annotations(input_file)
