@@ -18,8 +18,10 @@ Transcov will help you with the following:
 * Explore coverage around TSS'.
 
 .. warning::
-    The documentation is still under construction, so a lot of information must be missing. 
-    I hope to have the basic documentation up and running soon
+    The documentation is still under construction, so a lot of information will be missing. 
+    I hope to have the basic documentation up and running soon. 
+    
+    The API should be up to date!
 
 .. toctree::
     :maxdepth: 2
