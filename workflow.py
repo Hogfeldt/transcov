@@ -2,18 +2,21 @@ from gwf import Workflow, AnonymousTarget
 from glob import glob
 from os.path import join
 
+gwf = Workflow(defaults={"walltime": "00:10:00"})
+
 # Target functions
 def preprocess_gencode_annotation(annotation_file, output_file):
     """ This target will generate a file, defining the TSS' to look for in
         the bam files. Theese TSS' will define the rows of the matrices """
     inputs = [annotation_file]
     outputs = [output_file]
+    options = {}
     spec = """
     transcov preprocess {} --output-file {}
     """.format(
         annotation_file, output_file
     )
-    return AnonymousTarget(inputs=inputs, outputs=outputs, spec=spec)
+    return AnonymousTarget(inputs=inputs, outputs=outputs, options=options, spec=spec)
 
 
 def generate_matrix(bam_file, tss_file, region_size, output_file):
@@ -68,7 +71,7 @@ gwf.target_from_template(
 
 coverage_matrices = list()
 for i, bam_file in enumerate(bams):
-    output_file = join(output_dir, bam_file.replace(".bam", ".coverage_matrix.npy"))
+    output_file = join(output_dir, bam_file.replace(".bam", ".coverage_matrix.npy").split('/')[-1])
     gwf.target_from_template(
         name=f"generate_matrix_{i}",
         template=generate_matrix(
