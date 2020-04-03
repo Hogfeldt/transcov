@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 
 def collapse(inputs, output, uint32=False):
+    """ API docstring """
     summary_matrix = np.load(inputs[0])
     if uint32 == True:
         dtype = np.uint32

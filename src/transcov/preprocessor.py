@@ -41,6 +41,7 @@ def determine_TSS_and_format_data(tx_anno):
     return TranscriptionStartSite(tss_id, tx_anno.chrom, TSS, tx_anno.strand, pull_tx_id(tx_anno), pull_ensemble_gene_id(tx_anno), pull_ccds_id(tx_anno))
 
 def preprocess(input_file, output_file):
+    """ API docstring! """
     tx_annotations = get_transcript_annotations(input_file)
     unique_TSSs = set()
     with open(output_file, 'w') as fp:

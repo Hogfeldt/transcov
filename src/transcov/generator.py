@@ -42,6 +42,7 @@ def add_fragment(A, start, end, i, k):
     A[i] += v
 
 def generate_coverage_matrix(bam_file, annotation_file, region_size, output_file, whole_fragment=False):
+    """ API docstring! """
     k = int(region_size / 2)
     tss_list = load_transcription_start_sites(annotation_file)
     coverage_matrix = np.zeros((len(tss_list), 2 * k + 1), dtype=np.uint16)
