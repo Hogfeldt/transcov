@@ -41,7 +41,21 @@ def determine_TSS_and_format_data(tx_anno):
     return TranscriptionStartSite(tss_id, tx_anno.chrom, TSS, tx_anno.strand, pull_tx_id(tx_anno), pull_ensemble_gene_id(tx_anno), pull_ccds_id(tx_anno))
 
 def preprocess(input_file, output_file):
-    """ API docstring! """
+    """ This function will given a gencode annotation file, find all transcripts
+        and determine the Transcription Start Site (TSS) for the transcript.
+        Information about the TSS will be stored in the output file.
+
+        Assumtion:
+        Two transcripts can have the same TSS (ref: https://academic.oup.com/nar/article/46/2/582/4675314)
+        therefor transcripts and TSS' will not be mapped one-to-one, but the first
+        transcript with a given TSS will be the one recorded
+
+        :param input_file: File path to the gencode annotation file.
+        :type input_file: str.
+        :param output_file: File path to the output file.
+        :type output_file: str.
+        :returns:  None
+    """
     tx_annotations = get_transcript_annotations(input_file)
     unique_TSSs = set()
     with open(output_file, 'w') as fp:
