@@ -57,7 +57,7 @@ bams = glob("bams/*.bam")
 #   Output Files:
 #   Here we assume that you have directory called coverage_matrices for storing
 #   the output files
-tss_file = "gencodes/gencode.v33.annotation.tss.tsv"
+tss_file = "gencodes/gencode.v19.annotation.tss.tsv"
 output_dir = "coverage_matrices"
 collapsed_coverage_matrix = join(output_dir, "collapsed_coverage_matrix.npy")
 
