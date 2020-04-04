@@ -51,7 +51,7 @@ def collapse_matrices_upon_eachother(matrices, output_file):
 #   Here we assume that you have a gencode annotation file in a directory called
 #   gencodes and your bam files in a directory called bams
 #
-gencode_annotation_file = "gencodes/gencode.v33.annotation.gff3"
+gencode_annotation_file = "gencodes/gencode.v19.annotation.gff3"
 bams = glob("bams/*.bam")
 
 #   Output Files:
