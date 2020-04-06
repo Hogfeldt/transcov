@@ -21,7 +21,7 @@ Transcov will help you with the following:
     The documentation is still under construction, so a lot of information will be missing. 
     I hope to have the basic documentation up and running soon. 
     
-    The API should be up to date!
+    The API is up to date and a pip installation guide can be found under installation.
 
 .. toctree::
     :maxdepth: 2

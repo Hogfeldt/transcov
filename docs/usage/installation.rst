@@ -7,9 +7,12 @@ Installation
 Conda
 =====
 
-Use it with Conda
+Conda recipe is not yet created
 
 Pip
 ===
 
-Use it from PYPI
+To install with pip, run the following command:
+
+.. code-block:: console
+    pip install transcov
