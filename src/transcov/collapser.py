@@ -14,6 +14,8 @@ def collapse(matrices, output_file, uint32=False):
         :type output_file: boolean
         :returns:  None
     """
+    print(matrices)
+    print(output_file)
     summary_matrix = np.load(matrices[0])
     if uint32 == True:
         dtype = np.uint32
@@ -21,7 +23,7 @@ def collapse(matrices, output_file, uint32=False):
     else:
         dtype = summary_matrix.dtype
     if len(matrices) > 1:
-        for input_file in matrices[1]:
+        for input_file in matrices[1:]:
             A = np.load(input_file).astype(dtype)
             summary_matrix += A
     np.save(output_file, summary_matrix)
