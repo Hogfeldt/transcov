@@ -1,8 +1,8 @@
 import click
 
 from .generator import generate_coverage_matrix
-from .preprocessor import preprocess
-from .collapser import collapse
+from . import preprocessor
+from . import collapser
 
 @click.group()
 def cli():
@@ -15,7 +15,7 @@ def cli():
 @click.argument('annotation_file')
 @click.option('-o', '--output-file', default='transcription_start_sites.tsv')
 def preprocess(annotation_file, output_file):
-    preprocess(annotation_file, output_file)
+    preprocessor.preprocess(annotation_file, output_file)
 
 @cli.command()
 @click.argument('bam_file')
@@ -31,4 +31,4 @@ def generate(bam_file, tss_file, region_size, output_file):
 @click.option('--uint32', is_flag=True)
 def collapse(matrices, output_file, uint32):
     if len(matrices) > 0:
-        collapse(matrices, output_file, uint32)
+        collapser.collapse(matrices, output_file, uint32)
