@@ -1,8 +1,16 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as fh:
+        long_description = fh.read()
+
 setup(
     name = "transcov",
+    version = "1.0.0",
+    author = "Per Høgfeldt"
     description = "A software for mapping coverage around transcription start sites",
+    long_description = long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/hogfeldt/transcov",
     packages=find_packages("src"),
     package_dir={"": "src"},
     #test_suite="test",
@@ -11,5 +19,11 @@ setup(
         'console_scripts': ['transcov = transcov.cli:cli'],
     },
     include_package_data=True,
+    python_requires='>=3.6',
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GPL-3.0 License",
+        "Operating System :: OS Independent",
+        ],
 )
 
