@@ -15,4 +15,5 @@ Pip
 To install with pip, run the following command:
 
 .. code-block:: console
+
     pip install transcov
