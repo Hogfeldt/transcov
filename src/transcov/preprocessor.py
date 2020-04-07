@@ -3,7 +3,7 @@ import attr
 import re
 
 from .transcript_annotation import pull_tx_id, pull_ensemble_gene_id, pull_ccds_id
-from .tss import TranscriptionStartSite
+from .tss import TranscriptionStartSite, get_header
 
 @attr.s
 class Tx_annotation:
@@ -38,17 +38,12 @@ def determine_TSS_and_format_data(tx_anno):
     else:
         raise Exception("Strand annotation is neither '+' nor '-'")
     tss_id = "_".join((tx_anno.chrom, str(TSS)))
-    return TranscriptionStartSite(tss_id, tx_anno.chrom, TSS, tx_anno.strand, pull_tx_id(tx_anno), pull_ensemble_gene_id(tx_anno), pull_ccds_id(tx_anno))
+    return TranscriptionStartSite(tss_id, tx_anno.chrom, TSS, tx_anno.strand, [pull_tx_id(tx_anno)], pull_ensemble_gene_id(tx_anno), pull_ccds_id(tx_anno))
 
 def preprocess(input_file, output_file):
     """ This function will given a gencode annotation file, find all transcripts
         and determine the Transcription Start Site (TSS) for the transcript.
         Information about the TSS will be stored in the output file.
-
-        Assumption:
-        Two transcripts can have the same TSS (ref: https://academic.oup.com/nar/article/46/2/582/4675314)
-        therefor transcripts and TSS' will not be mapped one-to-one, but the first
-        transcript with a given TSS will be the one recorded
 
         :param input_file: File path to the gencode annotation file
         :type input_file: str
@@ -57,11 +52,15 @@ def preprocess(input_file, output_file):
         :returns:  None
     """
     tx_annotations = get_transcript_annotations(input_file)
-    unique_TSSs = set()
+    TSS_dict = dict()
+    for tx_anno in tx_annotations:
+        tss = determine_TSS_and_format_data(tx_anno)
+        if tss.tss_id in TSS_dict:
+            TSS_dict[tss.tss_id].tx_ids += tss.tx_ids
+        else:
+            TSS_dict[tss.tss_id] = tss
     with open(output_file, 'w') as fp:
-        for tx_anno in tx_annotations:
-            tss = determine_TSS_and_format_data(tx_anno)
-            if tss.tss_id not in unique_TSSs:
-                unique_TSSs.add(tss.tss_id)
-                fp.write("%s\n" % str(tss))
+        fp.write(get_header() + '\n')
+        for tss_id in TSS_dict.keys():
+            fp.write("%s\n" % str(TSS_dict[tss_id]))
     return output_file
