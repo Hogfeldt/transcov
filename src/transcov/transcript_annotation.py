@@ -18,16 +18,19 @@ def is_chrome_autosome(chrom):
 def pull_tx_id(anno_obj):
     return anno_obj.additionals.split(";")[0].split(".")[0].replace("ID=", "")
 
+
 def pull_ensemble_gene_id(anno_obj):
-    return anno_obj.additionals.split(';')[2].split('.')[0].replace("gene_id=","")
+    return anno_obj.additionals.split(";")[2].split(".")[0].replace("gene_id=", "")
+
 
 def pull_ccds_id(anno_obj):
-    if 'CCDS' in anno_obj.additionals:
-        add_list = anno_obj.additionals.split(';')
+    if "CCDS" in anno_obj.additionals:
+        add_list = anno_obj.additionals.split(";")
         for add in add_list:
-            if 'ccdsid=' in add:
-                return add.replace('ccdsid=', '')
+            if "ccdsid=" in add:
+                return add.replace("ccdsid=", "")
     return None
+
 
 def load_transcript_annotations_iter(annotation_path):
     with open(annotation_path, "r") as fp:

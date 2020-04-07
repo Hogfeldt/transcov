@@ -12,11 +12,13 @@ def calc_rel_start_and_end(read_start, read_end, strand, TSS):
     elif strand == "-":
         return (-rel_end, -rel_start)
 
+
 def add_read_ends(A, start, end, i, k):
     if start >= -k and start <= k:
         A[i][k + start] += 1
     if end >= -k and end <= k:
         A[i][k + end] += 1
+
 
 def add_fragment(A, start, end, i, k):
     _, m = A.shape
@@ -30,7 +32,10 @@ def add_fragment(A, start, end, i, k):
     v[a:b] = 1
     A[i] += v
 
-def generate_coverage_matrix(bam_file, tss_file, region_size, output_file, whole_fragment=False):
+
+def generate_coverage_matrix(
+    bam_file, tss_file, region_size, output_file, whole_fragment=False
+):
     """ This function will iterate over the TSS' in the tss file, and fetch
         all fragments from the bam file, in a region of the size defined by region_size. 
         The TSS will be the center of the region.

@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 
+
 def collapse(matrices, output_file, uint32=False):
     """ This function will given a list of matrices, load in the matrices one by
         one and collapse them upon each other value by value.
