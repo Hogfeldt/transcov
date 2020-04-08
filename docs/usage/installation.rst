@@ -7,12 +7,17 @@ Installation
 Conda
 =====
 
-Conda recipe is not yet created
+I recommend installing this software with conda, where it's available from the Bioconda channel:
+
+.. code-block:: console
+
+    conda install transcov --channel bioconda
+
 
 Pip
 ===
 
-To install with pip, run the following command:
+You can also install with pip, using the following command:
 
 .. code-block:: console
 
