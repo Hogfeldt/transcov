@@ -2,7 +2,7 @@ import argparse
 import attr
 import re
 
-from .transcript_annotation import pull_tx_id, pull_ensemble_gene_id, pull_ccds_id
+from .transcript_annotation import pull_tx_id, pull_ensemble_gene_id, pull_ccds_id, pull_tx_type
 from .tss import TranscriptionStartSite, get_header
 
 
@@ -50,6 +50,7 @@ def determine_TSS_and_format_data(tx_anno):
         [pull_tx_id(tx_anno)],
         pull_ensemble_gene_id(tx_anno),
         pull_ccds_id(tx_anno),
+        pull_tx_type(tx_anno),
     )
 
 

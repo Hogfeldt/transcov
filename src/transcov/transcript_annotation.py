@@ -32,6 +32,10 @@ def pull_ccds_id(anno_obj):
     return None
 
 
+def pull_tx_type(anno_obj):
+    return anno_obj.additionals.split(";")[7].replace("transcript_type=", "")
+
+
 def load_transcript_annotations_iter(annotation_path):
     with open(annotation_path, "r") as fp:
         for line in fp.read().split("\n"):
