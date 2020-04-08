@@ -11,7 +11,7 @@ class TranscriptionStartSite:
     tx_ids = attr.ib()
     gene_id = attr.ib()
     ccds_id = attr.ib()
-    tx_type = attr.ib()
+    tx_types = attr.ib()
 
     def __str__(self):
         return "\t".join(
@@ -23,14 +23,14 @@ class TranscriptionStartSite:
                 " ".join(self.tx_ids),
                 self.gene_id,
                 str(self.ccds_id),  # is string or None
-                self.tx_type,
+                " ".join(self.tx_types),
             )
         )
 
 
 def get_header():
     return "\t".join(
-        ("tss_id", "chrom", "tss", "strand", "tx_ids", "gene_id", "ccds_id", "tx_type")
+        ("tss_id", "chrom", "tss", "strand", "tx_ids", "gene_id", "ccds_id", "tx_types")
     )
 
 
@@ -48,7 +48,7 @@ def load_transcription_start_sites(input_file):
                 line[4].split(),
                 line[5],
                 line[6],
-                line[7],
+                line[7].split(),
             )
             TSSs.append(tss)
     return TSSs
