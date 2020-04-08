@@ -50,7 +50,7 @@ def determine_TSS_and_format_data(tx_anno):
         [pull_tx_id(tx_anno)],
         pull_ensemble_gene_id(tx_anno),
         pull_ccds_id(tx_anno),
-        pull_tx_type(tx_anno),
+        [pull_tx_type(tx_anno)],
     )
 
 
@@ -70,6 +70,8 @@ def preprocess(input_file, output_file):
     for tx_anno in tx_annotations:
         tss = determine_TSS_and_format_data(tx_anno)
         if tss.tss_id in TSS_dict:
+            if tss.tx_types[0] not in TSS_dict[tss.tss_id].tx_types:
+                TSS_dict[tss.tss_id].tx_types += tss.tx_types
             TSS_dict[tss.tss_id].tx_ids += tss.tx_ids
         else:
             TSS_dict[tss.tss_id] = tss
