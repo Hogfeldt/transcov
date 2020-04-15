@@ -32,7 +32,9 @@ def generate(bam_file, tss_file, region_size, output_file):
 @cli.command()
 @click.argument("matrices", nargs=-1)
 @click.option("-o", "--output-file", default="collapsed_matrix.npy")
+@click.option("-s", "--start", default=0, type=click.IntRange(min=0))
+@click.option("-e", "--end", default=None, type=int)
 @click.option("--uint32", is_flag=True)
-def collapse(matrices, output_file, uint32):
+def collapse(matrices, output_file, start, end, uint32):
     if len(matrices) > 0:
-        collapser.collapse(matrices, output_file, uint32)
+        collapser.collapse(matrices, output_file, start, end, uint32)
