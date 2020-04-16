@@ -5,30 +5,30 @@ from os.path import join
 gwf = Workflow(defaults={"walltime": "00:10:00"})
 
 # Target functions
-def preprocess_gencode_annotation(annotation_file, output_file):
-    """ This target will generate a file, defining the TSS' to look for in
-        the bam files. Theese TSS' will define the rows of the matrices """
+def preprocess_gencode_annotation(annotation_file, bed_file, tss_file, region_size):
+    """ This target will generate a file bed file and meta data file, defining the TSS' 
+        to look for in the bam files. Theese TSS' will define the rows of the matrices """
     inputs = [annotation_file]
-    outputs = [output_file]
+    outputs = [bed_file, tss_file]
     options = {}
     spec = """
-    transcov preprocess {} --output-file {}
+    transcov preprocess {} --bed-file {} --tss-file {} --region-size {}
     """.format(
-        annotation_file, output_file
+        annotation_file, bed_file, tss_file, region_size
     )
     return AnonymousTarget(inputs=inputs, outputs=outputs, options=options, spec=spec)
 
 
-def generate_matrix(bam_file, tss_file, region_size, output_file):
-    """ This target will given a bam file and a file created by the preprocesser
+def generate_matrix(bam_file, bed_file, output_file):
+    """ This target will given a bam file and a bed file created by the preprocesser
         generate a coverage matrix, showing read depth in a region around the TSS """
-    inputs = [bam_file, tss_file]
+    inputs = [bam_file, bed_file]
     outputs = [output_file]
     options = {"walltime": "12:00:00", "memory": "6gb"}
     spec = """
-    transcov generate {} {} --region-size {} --output-file {}
+    transcov generate {} {} --output-file {}
     """.format(
-        bam_file, tss_file, region_size, output_file
+        bam_file, bed_file, output_file
     )
     return AnonymousTarget(inputs=inputs, outputs=outputs, options=options, spec=spec)
 
@@ -40,7 +40,7 @@ def collapse_matrices_upon_eachother(matrices, output_file):
     outputs = [output_file]
     options = {"walltime": "1:00:00", "memory": "24gb"}
     spec = """
-    transcov collapse {} --output-file {}
+    transcov collapse {} --output-file {} 
     """.format(
         " ".join(matrices), output_file
     )
@@ -58,6 +58,7 @@ bams = glob("bams/*.bam")
 #   Here we assume that you have directory called coverage_matrices for storing
 #   the output files
 tss_file = "gencodes/gencode.v19.annotation.tss.tsv"
+bed_file = "gencodes/gencode.v19.annotation.tss.bed"
 output_dir = "coverage_matrices"
 collapsed_coverage_matrix = join(output_dir, "collapsed_coverage_matrix.npy")
 
@@ -65,7 +66,10 @@ collapsed_coverage_matrix = join(output_dir, "collapsed_coverage_matrix.npy")
 gwf.target_from_template(
     name="preprocess_gencode_annotation",
     template=preprocess_gencode_annotation(
-        annotation_file=gencode_annotation_file, output_file=tss_file
+        annotation_file=gencode_annotation_file, 
+        bed_file=bed_file, 
+        tss_file=tss_file, 
+        region_size=10000
     ),
 )
 
@@ -76,8 +80,7 @@ for i, bam_file in enumerate(bams):
         name=f"generate_matrix_{i}",
         template=generate_matrix(
             bam_file=bam_file,
-            tss_file=tss_file,
-            region_size=10000,
+            bed_file=bed_file,
             output_file=output_file,
         ),
     )
