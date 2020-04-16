@@ -15,18 +15,19 @@ def cli():
 
 @cli.command()
 @click.argument("annotation_file")
-@click.option("-o", "--output-file", default="transcription_start_sites.tsv")
-def preprocess(annotation_file, output_file):
-    preprocessor.preprocess(annotation_file, output_file)
+@click.option("-k", "--region-size", default=10000, type=click.IntRange(min=0))
+@click.option("--bed-file", default="transcription_start_sites.bed")
+@click.option("--tss-file", default="transcription_start_sites.tsv")
+def preprocess(annotation_file, region_size, bed_file, tss_file):
+    preprocessor.preprocess(annotation_file, region_size, bed_file, tss_file)
 
 
 @cli.command()
 @click.argument("bam_file")
-@click.argument("tss_file")
-@click.option("-k", "--region-size", default=10000)
+@click.argument("bed_file")
 @click.option("-o", "--output-file", default="coverage_matrix.npy")
-def generate(bam_file, tss_file, region_size, output_file):
-    generate_coverage_matrix(bam_file, tss_file, region_size, output_file)
+def generate(bam_file, bed_file, output_file):
+    generate_coverage_matrix(bam_file, bed_file, output_file)
 
 
 @cli.command()

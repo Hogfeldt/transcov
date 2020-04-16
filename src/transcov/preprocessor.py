@@ -1,6 +1,7 @@
 import argparse
 import attr
 import re
+import csv
 
 from .transcript_annotation import pull_tx_id, pull_ensemble_gene_id, pull_ccds_id, pull_tx_type
 from .tss import TranscriptionStartSite, get_header
@@ -54,15 +55,21 @@ def determine_TSS_and_format_data(tx_anno):
     )
 
 
-def preprocess(input_file, output_file):
+def preprocess(input_file, region_size, bed_file, tss_file):
     """ This function will given a gencode annotation file, find all transcripts
         and determine the Transcription Start Site (TSS) for the transcript.
-        Information about the TSS will be stored in the output file.
+        Information about the TSS will be stored in the tss file with metadata
+        and a bed file which can be used as input for the generator.
 
         :param input_file: File path to the gencode annotation file
         :type input_file: str
-        :param output_file: File path to the output file
-        :type output_file: str
+        :param region_size: Size of the region with the TSS in the center which
+                            should be stored in the bed file
+        :type region_size: int >= 0
+        :param bed_file: File path to the bed file
+        :type bed_file: str
+        :param tss_file: File path to the tss file
+        :type tss_file: str
         :returns:  None
     """
     tx_annotations = get_transcript_annotations(input_file)
@@ -75,8 +82,22 @@ def preprocess(input_file, output_file):
             TSS_dict[tss.tss_id].tx_ids += tss.tx_ids
         else:
             TSS_dict[tss.tss_id] = tss
-    with open(output_file, "w") as fp:
+    with open(bed_file, "w") as fp:
+        k = int(region_size/2)
+        writer = csv.writer(fp, delimiter='\t')
+        writer.writerow(['#chrom','start','end','name','score','strand'])
+        for tss_id in TSS_dict.keys():
+            tss = TSS_dict[tss_id]
+            writer.writerow([
+                tss.chrom, 
+                tss.tss - k, 
+                tss.tss + k,
+                tss_id,
+                0,
+                tss.strand
+                ])
+    with open(tss_file, "w") as fp:
         fp.write("#%s\n" % get_header())
         for tss_id in TSS_dict.keys():
             fp.write("%s\n" % str(TSS_dict[tss_id]))
-    return output_file
+    return (bed_file, tss_file)
