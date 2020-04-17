@@ -84,7 +84,7 @@ def generate_length_matrix(
             end = int(reading[2])
             length = abs(end - start)
             if length < max_length:
-                matrix[i] += 1
+                matrix[i,length] += 1
     np.save(output_file, matrix)
 
 def generate_read_ends_matrix(
