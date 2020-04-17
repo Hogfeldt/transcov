@@ -10,7 +10,7 @@ class BED:
     chrom = attr.ib()
     start = attr.ib()
     end = attr.ib()
-    name = attr.ib()
+    tss_id = attr.ib()
     score = attr.ib()
     strand = attr.ib()
 
@@ -25,27 +25,29 @@ def load_bed_file(file_path):
             bed_list.append(BED(line[0], int(line[1]), int(line[2]), line[3], int(line[4]), line[5]))
     return bed_list
 
-def calc_rel_start_and_end(read_start, read_end, strand, start):
-    rel_start = read_start - start
-    rel_end = read_end - start
+def calc_rel_start_and_end(read_start, read_end, strand, tss):
+    rel_start = read_start - tss
+    rel_end = read_end - tss
     if strand == "+":
         return (rel_start, rel_end)
     elif strand == "-":
         return (-rel_end, -rel_start)
 
 
-def add_read_ends(A, start, end, i):
+def add_read_ends(A, start, end, i, k):
     _, m = A.shape
-    if start >= 0 and start < m:
-        A[i][start] += 1
-    if end >= 0 and end < m:
-        A[i][end] += 1
+    a = start + k
+    b = end + k
+    if a >= 0 and a < m:
+        A[i][a] += 1
+    if b >= 0 and b < m:
+        A[i][b] += 1
 
 
-def add_fragment(A, start, end, i):
+def add_fragment(A, start, end, i, k):
     _, m = A.shape
-    a = min((start, end))
-    b = max((start, end))
+    a = min((start, end)) + k
+    b = max((start, end)) + k
     if a < 0:
         a = 0
     if b > m:
@@ -85,14 +87,16 @@ def generate_coverage_matrix(
     coverage_matrix = np.zeros((len(bed_list), region_size), dtype=np.uint16)
     for i, region in enumerate(bed_list):
         bam = BAM(bam_file)
+        tss = int(region.tss_id.split('_')[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             read_start = int(reading[1])
             read_end = int(reading[2])
             rel_start, rel_end = calc_rel_start_and_end(
-                read_start, read_end, region.strand, region.start
+                read_start, read_end, region.strand, tss
             )
+            k = tss - start
             if whole_fragment == True:
-                add_fragment(coverage_matrix, rel_start, rel_end, i)
+                add_fragment(coverage_matrix, rel_start, rel_end, i, k)
             else:
-                add_read_ends(coverage_matrix, rel_start, rel_end, i)
+                add_read_ends(coverage_matrix, rel_start, rel_end, i, k)
     np.save(output_file, coverage_matrix)
