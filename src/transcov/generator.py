@@ -94,7 +94,7 @@ def generate_coverage_matrix(
             rel_start, rel_end = calc_rel_start_and_end(
                 read_start, read_end, region.strand, tss
             )
-            k = tss - start
+            k = tss - region.start
             if whole_fragment == True:
                 add_fragment(coverage_matrix, rel_start, rel_end, i, k)
             else:
