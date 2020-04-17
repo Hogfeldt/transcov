@@ -13,7 +13,7 @@ setup(
     url="https://github.com/hogfeldt/transcov",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    # test_suite="test",
+    test_suite="test",
     install_requires=[
         "pysam",        # 0.15.4
         "numpy",        # 1.18.1
