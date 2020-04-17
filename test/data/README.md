@@ -6,4 +6,6 @@ For testing purpose we have collected an open access bam file from a study calle
 - reference: hg19
 
 We have used samtools to collect a subset of reads with the following command:
-`samtools view -b -o test.bam SRR2130051_GSM1833277_IH02_Homo_sapiens_OTHER.bam 2:201,900,000-202,000,000`
+```
+samtools view -b -o test.bam SRR2130051_GSM1833277_IH02_Homo_sapiens_OTHER.bam 2:201,900,000-202,000,000
+```
