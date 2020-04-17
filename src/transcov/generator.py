@@ -77,8 +77,8 @@ def generate_length_matrix(
     """
     bed_list = load_bed_file(bed_file)
     matrix = np.zeros((len(bed_list), max_length), dtype=np.uint16)
+    bam = BAM(bam_file)
     for i, region in enumerate(bed_list):
-        bam = BAM(bam_file)
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             start = int(reading[1])
             end = int(reading[2])
@@ -108,8 +108,8 @@ def generate_read_ends_matrix(
     bed_list = load_bed_file(bed_file)
     region_size = bed_list[0].end - bed_list[0].start
     coverage_matrix = np.zeros((len(bed_list), region_size), dtype=np.uint16)
+    bam = BAM(bam_file)
     for i, region in enumerate(bed_list):
-        bam = BAM(bam_file)
         tss = int(region.tss_id.split('_')[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             read_start = int(reading[1])
@@ -142,8 +142,8 @@ def generate_coverage_matrix(
     bed_list = load_bed_file(bed_file)
     region_size = bed_list[0].end - bed_list[0].start
     coverage_matrix = np.zeros((len(bed_list), region_size), dtype=np.uint16)
+    bam = BAM(bam_file)
     for i, region in enumerate(bed_list):
-        bam = BAM(bam_file)
         tss = int(region.tss_id.split('_')[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             read_start = int(reading[1])
