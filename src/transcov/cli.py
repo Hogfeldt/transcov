@@ -1,6 +1,6 @@
 import click
 
-from .generator import generate_coverage_matrix
+from .generator import generate_coverage_matrix, generate_read_ends_matrix, generate_length_matrix
 from . import preprocessor
 from . import collapser
 
@@ -21,14 +21,27 @@ def cli():
 def preprocess(annotation_file, region_size, bed_file, tss_file):
     preprocessor.preprocess(annotation_file, region_size, bed_file, tss_file)
 
-
 @cli.command()
 @click.argument("bam_file")
 @click.argument("bed_file")
 @click.option("-o", "--output-file", default="coverage_matrix.npy")
-def generate(bam_file, bed_file, output_file):
+def generate_coverage(bam_file, bed_file, output_file):
     generate_coverage_matrix(bam_file, bed_file, output_file)
 
+@cli.command()
+@click.argument("bam_file")
+@click.argument("bed_file")
+@click.option("-o", "--output-file", default="read_ends_matrix.npy")
+def generate_read_ends(bam_file, bed_file, output_file):
+    generate_read_ends_matrix(bam_file, bed_file, output_file)
+
+@cli.command()
+@click.argument("bam_file")
+@click.argument("bed_file")
+@click.option("-o", "--output-file", default="length_matrix.npy")
+@click.option("-m", "--max-length", default=500, type=click.IntRange(min=1))
+def generate_length(bam_file, bed_file, output_file, max_length):
+    generate_length_matrix(bam_file, bed_file, output_file, max_length)
 
 @cli.command()
 @click.argument("matrices", nargs=-1)

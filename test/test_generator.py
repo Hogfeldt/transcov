@@ -139,11 +139,27 @@ class Test_module_with_file_io(unittest.TestCase):
     def tearDown(self):
         self.output_matrix.close()
 
-    def test_matrix_generation(self):
+    def test_read_ends_matrix_generation(self):
         bam_file = join(dirname(__file__), 'data/test.bam')
         bed_file = join(dirname(__file__), 'data/gencode.v19.annotation.tss.bed')
-        res_matrix = join(dirname(__file__), 'data/coverage_matrix_read_ends.npy')
+        res_matrix = join(dirname(__file__), 'data/read_ends_matrix.npy')
+        generator.generate_read_ends_matrix(bam_file, bed_file, self.output_matrix.name)
+        res = filecmp.cmp(res_matrix, self.output_matrix.name + '.npy', shallow=False)
+        self.assertTrue(res)
+
+    def test_coverage_matrix_generation(self):
+        bam_file = join(dirname(__file__), 'data/test.bam')
+        bed_file = join(dirname(__file__), 'data/gencode.v19.annotation.tss.bed')
+        res_matrix = join(dirname(__file__), 'data/coverage_matrix.npy')
         generator.generate_coverage_matrix(bam_file, bed_file, self.output_matrix.name)
+        res = filecmp.cmp(res_matrix, self.output_matrix.name + '.npy', shallow=False)
+        self.assertTrue(res)
+
+    def test_length_matrix_generation(self):
+        bam_file = join(dirname(__file__), 'data/test.bam')
+        bed_file = join(dirname(__file__), 'data/gencode.v19.annotation.tss.bed')
+        res_matrix = join(dirname(__file__), 'data/length_matrix.npy')
+        generator.generate_length_matrix(bam_file, bed_file, self.output_matrix.name)
         res = filecmp.cmp(res_matrix, self.output_matrix.name + '.npy', shallow=False)
         self.assertTrue(res)
 
