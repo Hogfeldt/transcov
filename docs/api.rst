@@ -5,4 +5,4 @@ API
 ===
 
 .. automodule:: transcov
-   :members:
+   :members: collapse
