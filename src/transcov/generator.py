@@ -55,6 +55,19 @@ def add_fragment(A, start, end, i, k):
     v[a:b] = 1
     A[i] += v
 
+def determine_index_file_name(output_file):
+    if output_file.split('.')[-1] == 'npy':
+        return output_file.replace('.npy', '.index')
+    else:
+        return output_file + ".index"
+
+def write_index_file(output_file, index_lst):
+    with open(determine_index_file_name(output_file), 'w') as fp:
+        tsv_writer = csv.writer(fp, delimiter='\t')
+        tsv_writer.writerow(("#index", "id"))
+        for row_info in index_lst:
+            tsv_writer.writerow(row_info)
+
 def generate_length_matrix(
     bam_file, bed_file, output_file, max_length=500
 ):
@@ -78,6 +91,7 @@ def generate_length_matrix(
     bed_list = load_bed_file(bed_file)
     matrix = np.zeros((len(bed_list), max_length), dtype=np.uint16)
     bam = BAM(bam_file)
+    index_lst = list()
     for i, region in enumerate(bed_list):
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             start = int(reading[1])
@@ -85,6 +99,8 @@ def generate_length_matrix(
             length = abs(end - start)
             if length < max_length:
                 matrix[i,length] += 1
+        index_lst.append((i, region.tss_id))
+    write_index_file(output_file, index_lst) 
     np.save(output_file, matrix)
 
 def generate_read_ends_matrix(
@@ -109,6 +125,7 @@ def generate_read_ends_matrix(
     region_size = bed_list[0].end - bed_list[0].start
     coverage_matrix = np.zeros((len(bed_list), region_size), dtype=np.uint16)
     bam = BAM(bam_file)
+    index_lst = list()
     for i, region in enumerate(bed_list):
         tss = int(region.tss_id.split('_')[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
@@ -119,6 +136,8 @@ def generate_read_ends_matrix(
             )
             k = tss - region.start
             add_read_ends(coverage_matrix, rel_start, rel_end, i, k)
+        index_lst.append((i, region.tss_id))
+    write_index_file(output_file, index_lst) 
     np.save(output_file, coverage_matrix)
 
 def generate_coverage_matrix(
@@ -143,6 +162,7 @@ def generate_coverage_matrix(
     region_size = bed_list[0].end - bed_list[0].start
     coverage_matrix = np.zeros((len(bed_list), region_size), dtype=np.uint16)
     bam = BAM(bam_file)
+    index_lst = list()
     for i, region in enumerate(bed_list):
         tss = int(region.tss_id.split('_')[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
@@ -153,4 +173,6 @@ def generate_coverage_matrix(
             )
             k = tss - region.start
             add_fragment(coverage_matrix, rel_start, rel_end, i, k)
+        index_lst.append((i, region.tss_id))
+    write_index_file(output_file, index_lst) 
     np.save(output_file, coverage_matrix)
