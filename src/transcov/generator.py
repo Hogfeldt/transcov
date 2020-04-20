@@ -38,9 +38,9 @@ def add_read_ends(A, start, end, i, k):
     a = start + k
     b = end + k
     if a >= 0 and a < m:
-        A[i][a] += 1
+        A[i,a] += 1
     if b >= 0 and b < m:
-        A[i][b] += 1
+        A[i,b] += 1
 
 
 def add_fragment(A, start, end, i, k):
