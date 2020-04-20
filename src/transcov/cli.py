@@ -1,6 +1,6 @@
 import click
 
-from .generator import generate_coverage_matrix, generate_read_ends_matrix, generate_length_matrix
+from . import generate_coverage_matrix, generate_read_ends_matrix, generate_length_matrix
 from . import preprocessor
 from . import collapser
 
