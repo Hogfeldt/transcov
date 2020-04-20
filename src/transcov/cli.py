@@ -1,8 +1,9 @@
 import click
 
-from . import generate_coverage_matrix, generate_read_ends_matrix, generate_length_matrix
+from .generator import generate_coverage_matrix, generate_read_ends_matrix, generate_length_matrix
 from . import preprocessor
-from . import collapser
+from . import manipulations
+from .utils import tsv_reader
 
 
 @click.group()
@@ -51,4 +52,16 @@ def generate_length(bam_file, bed_file, output_file, max_length):
 @click.option("--uint32", is_flag=True)
 def collapse(matrices, output_file, start, end, uint32):
     if len(matrices) > 0:
-        collapser.collapse(matrices, output_file, start, end, uint32)
+        manipulations.collapse(matrices, output_file, start, end, uint32)
+
+@cli.command()
+@click.argument("input_matrix")
+@click.argument("index_file")
+@click.argument("ids_file")
+@click.option("-o", "--output-file", default="subset_matrix.npy")
+def pick_subset(input_matrix, index_file, ids_file, output_file)
+    ids = list()
+    with open(ids_file) as fp:
+        for line in tsv_reader(fp):
+            ids.append(line[0])
+    manipulations(input_matrix, index_file, output_file, ids)
