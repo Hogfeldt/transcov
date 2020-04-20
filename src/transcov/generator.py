@@ -3,6 +3,7 @@ import csv
 import attr
 
 from .bam import BAM
+from .utils import write_matrix_and_index_file
 
 @attr.s
 class BED:
@@ -55,18 +56,6 @@ def add_fragment(A, start, end, i, k):
     v[a:b] = 1
     A[i] += v
 
-def determine_index_file_name(output_file):
-    if output_file.split('.')[-1] == 'npy':
-        return output_file.replace('.npy', '.index')
-    else:
-        return output_file + ".index"
-
-def write_index_file(output_file, index_lst):
-    with open(determine_index_file_name(output_file), 'w') as fp:
-        tsv_writer = csv.writer(fp, delimiter='\t')
-        tsv_writer.writerow(("#index", "id"))
-        for row_info in index_lst:
-            tsv_writer.writerow(row_info)
 
 def generate_length_matrix(
     bam_file, bed_file, output_file, max_length=500
@@ -100,8 +89,7 @@ def generate_length_matrix(
             if length < max_length:
                 matrix[i,length] += 1
         index_lst.append((i, region.tss_id))
-    write_index_file(output_file, index_lst) 
-    np.save(output_file, matrix)
+    write_matrix_and_index_file(output_file, matrix, index_lst)
 
 def generate_read_ends_matrix(
     bam_file, bed_file, output_file
@@ -137,8 +125,7 @@ def generate_read_ends_matrix(
             k = tss - region.start
             add_read_ends(coverage_matrix, rel_start, rel_end, i, k)
         index_lst.append((i, region.tss_id))
-    write_index_file(output_file, index_lst) 
-    np.save(output_file, coverage_matrix)
+    write_matrix_and_index_file(output_file, coverage_matrix, index_lst)
 
 def generate_coverage_matrix(
     bam_file, bed_file, output_file
@@ -174,5 +161,4 @@ def generate_coverage_matrix(
             k = tss - region.start
             add_fragment(coverage_matrix, rel_start, rel_end, i, k)
         index_lst.append((i, region.tss_id))
-    write_index_file(output_file, index_lst) 
-    np.save(output_file, coverage_matrix)
+    write_matrix_and_index_file(output_file, coverage_matrix, index_lst)
