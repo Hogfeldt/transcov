@@ -1,9 +1,11 @@
 import argparse
 import numpy as np
+import filecmp
+from shutil import copyfile
 from functools import partial
 from itertools import tee, count
 
-from .utils import tsv_reader, write_matrix_and_index_file
+from .utils import tsv_reader, write_matrix_and_index_file, determine_index_file_name
 
 
 def create_index_map(index_file):
@@ -63,25 +65,28 @@ def pick_subset(matrix_file, index_file, output_file, ids):
     write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
 
 
-def collapse(matrices, output_file, start=0, end=None, uint32=False):
-    """ This function will given a list of matrices, load in the matrices one by
-        one and collapse them upon each other value by value.
-        The final matrix will be stored in the output file as a .npy file
+def first_true(pred_func, it):
+    for elm in it:
+        if pred_func(elm):
+            return elm
 
-        Use start and end if you want to only collapse and output a certain region.
 
-        :param matrices: List of file paths to matrices, that should be collapsed
-        :type matrices: List(str)
-        :param output_file: File path to the output file
-        :type output_file: str
-        :param start: start index for collapsing
-        :type start: int >= 0
-        :param end: end index for collapsing, if None then last index is end.
-        :type end: int >= 0
-        :param uint32: If False numpy.dtype will be preserved, if True numpy.dtype will be changed to uint32
-        :type output_file: boolean
-        :returns:  None
-    """
+def assert_index_files_are_identical(index_files):
+    not_none = lambda x: x != None
+    ground_truth = first_true(not_none, index_files)
+    if ground_truth == None:
+        print("Warning: No index files found")
+        return None
+    filtered_index_files = list(filter(not_none, index_files))
+    if len(index_files) != len(filtered_index_files):
+        print("Warning: Index files missing")
+    assert all(
+        map(partial(filecmp.cmp, ground_truth, shallow=False), filtered_index_files)
+    ), "Index files doesn't match"
+    return ground_truth
+
+
+def sum_matrices(matrices, start, end, uint32):
     summary_matrix = np.load(matrices[0])
     if end == None:
         _, end = summary_matrix.shape
@@ -95,4 +100,31 @@ def collapse(matrices, output_file, start=0, end=None, uint32=False):
         for input_file in matrices[1:]:
             A = np.load(input_file).astype(dtype)[:, start:end]
             summary_matrix += A
+    return summary_matrix
+
+
+def collapse(matrix_index_pairs, output_file, start=0, end=None, uint32=False):
+    """ This function will given a list matrix-index pairs, load in the matrices one by
+        one and collapse them upon each other value by value.
+        The final matrix will be stored in the output file as a .npy file, with a 
+        corresponding index file.
+
+        Use start and end if you want to only collapse and output a certain region.
+
+        :param matrix_index_pairs: List of pairs (file path to matrix, file path index file)
+        :type matrices: List((str,str))
+        :param output_file: File path to the output file
+        :type output_file: str
+        :param start: start index for collapsing
+        :type start: int >= 0
+        :param end: end index for collapsing, if None then last index is end.
+        :type end: int >= 0
+        :param uint32: If False numpy.dtype will be preserved, if True numpy.dtype will be changed to uint32
+        :type output_file: boolean
+        :returns:  None
+    """
+    matrix_files, index_files = list(zip(*matrix_index_pairs))
+    index_file = assert_index_files_are_identical(index_files)
+    summary_matrix = sum_matrices(matrix_files, start, end, uint32)
+    copyfile(index_file, determine_index_file_name(output_file))
     np.save(output_file, summary_matrix)

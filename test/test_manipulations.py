@@ -49,6 +49,21 @@ class Test_pick_subset_integration(unittest.TestCase):
         res = np.load(self.output_matrix.name + ".npy")
         self.assertTrue((res == exp_res).all())
 
+class Test_collapse_integration(unittest.TestCase):
+    def setUp(self):
+        self.output_matrix = tempfile.NamedTemporaryFile()
+
+    def tearDown(self):
+        self.output_matrix.close()
+
+    def test_coverage_collapse(self):
+        matrix = join(dirname(__file__), "data/coverage_matrix.npy")
+        index = join(dirname(__file__), "data/coverage_matrix.index")
+        matrix_index_pairs = [(matrix, index), (matrix, index)]
+        mut.collapse(matrix_index_pairs, self.output_matrix.name)
+        A = np.load(matrix)
+        B = np.load(self.output_matrix.name + ".npy")
+        self.assertTrue(((A+A)==B).all())
 
 if __name__ == "__main__":
     unittest.main()

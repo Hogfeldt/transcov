@@ -1,4 +1,5 @@
 import click
+from os.path import isfile
 
 from .generator import (
     generate_coverage_matrix,
@@ -7,7 +8,7 @@ from .generator import (
 )
 from . import preprocessor
 from . import manipulations
-from .utils import tsv_reader
+from .utils import tsv_reader, determine_index_file_name
 
 
 @click.group()
@@ -60,7 +61,16 @@ def generate_length(bam_file, bed_file, output_file, max_length):
 @click.option("--uint32", is_flag=True)
 def collapse(matrices, output_file, start, end, uint32):
     if len(matrices) > 0:
-        manipulations.collapse(matrices, output_file, start, end, uint32)
+
+        def isfile_or_none(file_path):
+            if isfile(file_path):
+                return file_path
+            else:
+                return None
+
+        indexes = map(isfile_or_none, map(determine_index_file_name, matrices))
+        print(indexes)
+        manipulations.collapse(zip(matrices, indexes), output_file, start, end, uint32)
 
 
 @cli.command()
