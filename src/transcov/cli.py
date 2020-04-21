@@ -59,9 +59,11 @@ def collapse(matrices, output_file, start, end, uint32):
 @click.argument("index_file")
 @click.argument("ids_file")
 @click.option("-o", "--output-file", default="subset_matrix.npy")
-def pick_subset(input_matrix, index_file, ids_file, output_file)
+def pick_subset(input_matrix, index_file, ids_file, output_file):
     ids = list()
     with open(ids_file) as fp:
         for line in tsv_reader(fp):
+            if line[0].startswith('#'):
+                continue
             ids.append(line[0])
-    manipulations(input_matrix, index_file, output_file, ids)
+    manipulations.pick_subset(input_matrix, index_file, output_file, ids)
