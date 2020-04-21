@@ -1,6 +1,10 @@
 import click
 
-from .generator import generate_coverage_matrix, generate_read_ends_matrix, generate_length_matrix
+from .generator import (
+    generate_coverage_matrix,
+    generate_read_ends_matrix,
+    generate_length_matrix,
+)
 from . import preprocessor
 from . import manipulations
 from .utils import tsv_reader
@@ -22,12 +26,14 @@ def cli():
 def preprocess(annotation_file, region_size, bed_file, tss_file):
     preprocessor.preprocess(annotation_file, region_size, bed_file, tss_file)
 
+
 @cli.command()
 @click.argument("bam_file")
 @click.argument("bed_file")
 @click.option("-o", "--output-file", default="coverage_matrix.npy")
 def generate_coverage(bam_file, bed_file, output_file):
     generate_coverage_matrix(bam_file, bed_file, output_file)
+
 
 @cli.command()
 @click.argument("bam_file")
@@ -36,6 +42,7 @@ def generate_coverage(bam_file, bed_file, output_file):
 def generate_read_ends(bam_file, bed_file, output_file):
     generate_read_ends_matrix(bam_file, bed_file, output_file)
 
+
 @cli.command()
 @click.argument("bam_file")
 @click.argument("bed_file")
@@ -43,6 +50,7 @@ def generate_read_ends(bam_file, bed_file, output_file):
 @click.option("-m", "--max-length", default=500, type=click.IntRange(min=1))
 def generate_length(bam_file, bed_file, output_file, max_length):
     generate_length_matrix(bam_file, bed_file, output_file, max_length)
+
 
 @cli.command()
 @click.argument("matrices", nargs=-1)
@@ -54,6 +62,7 @@ def collapse(matrices, output_file, start, end, uint32):
     if len(matrices) > 0:
         manipulations.collapse(matrices, output_file, start, end, uint32)
 
+
 @cli.command()
 @click.argument("input_matrix")
 @click.argument("index_file")
@@ -63,7 +72,7 @@ def pick_subset(input_matrix, index_file, ids_file, output_file):
     ids = list()
     with open(ids_file) as fp:
         for line in tsv_reader(fp):
-            if line[0].startswith('#'):
+            if line[0].startswith("#"):
                 continue
             ids.append(line[0])
     manipulations.pick_subset(input_matrix, index_file, output_file, ids)

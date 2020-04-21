@@ -3,7 +3,12 @@ import attr
 import re
 import csv
 
-from .transcript_annotation import pull_tx_id, pull_ensemble_gene_id, pull_ccds_id, pull_tx_type
+from .transcript_annotation import (
+    pull_tx_id,
+    pull_ensemble_gene_id,
+    pull_ccds_id,
+    pull_tx_type,
+)
 from .tss import TranscriptionStartSite, get_header
 
 
@@ -83,19 +88,14 @@ def preprocess(input_file, region_size, bed_file, tss_file):
         else:
             TSS_dict[tss.tss_id] = tss
     with open(bed_file, "w") as fp:
-        k = int(region_size/2)
-        writer = csv.writer(fp, delimiter='\t')
-        writer.writerow(['#chrom','start','end','name','score','strand'])
+        k = int(region_size / 2)
+        writer = csv.writer(fp, delimiter="\t")
+        writer.writerow(["#chrom", "start", "end", "name", "score", "strand"])
         for tss_id in TSS_dict.keys():
             tss = TSS_dict[tss_id]
-            writer.writerow([
-                tss.chrom, 
-                tss.tss - k, 
-                tss.tss + k,
-                tss_id,
-                0,
-                tss.strand
-                ])
+            writer.writerow(
+                [tss.chrom, tss.tss - k, tss.tss + k, tss_id, 0, tss.strand]
+            )
     with open(tss_file, "w") as fp:
         fp.write("#%s\n" % get_header())
         for tss_id in TSS_dict.keys():

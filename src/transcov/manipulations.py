@@ -5,14 +5,16 @@ from itertools import tee, count
 
 from .utils import tsv_reader, write_matrix_and_index_file
 
+
 def create_index_map(index_file):
     index_map = dict()
     with open(index_file) as fp:
         for line in tsv_reader(fp):
-            if line[0].startswith('#'):
+            if line[0].startswith("#"):
                 continue
             index_map[line[1]] = int(line[0])
     return index_map
+
 
 def pick_subset_by_row_index(X, index_pairs, n):
     _, m = X.shape
@@ -21,13 +23,16 @@ def pick_subset_by_row_index(X, index_pairs, n):
         A[i] = X[j]
     return A
 
+
 pairing = lambda index_map, row_id: (row_id, index_map[row_id])
 
+
 def unzip_pair_iter(it):
-    it1, it2  = tee(it)
-    first_it  = (a for a, b in it1)
+    it1, it2 = tee(it)
+    first_it = (a for a, b in it1)
     second_it = (b for a, b in it2)
     return (first_it, second_it)
+
 
 def get_id_index_pair_iters(index_map, ids):
     pair_iter = map(partial(pairing, index_map), ids)
@@ -35,6 +40,7 @@ def get_id_index_pair_iters(index_map, ids):
     new_index_id_pairs = zip(count(), ids_iter)
     new_old_index_pairs = zip(count(), index_iter)
     return (new_index_id_pairs, new_old_index_pairs)
+
 
 def pick_subset(matrix_file, index_file, output_file, ids):
     """ Given a matrix and a list of row identifiers, create a 
@@ -55,6 +61,7 @@ def pick_subset(matrix_file, index_file, output_file, ids):
     new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters(index_map, ids)
     sub_matrix = pick_subset_by_row_index(matrix, new_old_index_pairs, len(ids))
     write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
+
 
 def collapse(matrices, output_file, start=0, end=None, uint32=False):
     """ This function will given a list of matrices, load in the matrices one by
@@ -78,7 +85,7 @@ def collapse(matrices, output_file, start=0, end=None, uint32=False):
     summary_matrix = np.load(matrices[0])
     if end == None:
         _, end = summary_matrix.shape
-    summary_matrix = summary_matrix[:,start:end]
+    summary_matrix = summary_matrix[:, start:end]
     if uint32 == True:
         dtype = np.uint32
         summary_matrix = summary_matrix.astype(dtype)
@@ -86,6 +93,6 @@ def collapse(matrices, output_file, start=0, end=None, uint32=False):
         dtype = summary_matrix.dtype
     if len(matrices) > 1:
         for input_file in matrices[1:]:
-            A = np.load(input_file).astype(dtype)[:,start:end]
+            A = np.load(input_file).astype(dtype)[:, start:end]
             summary_matrix += A
     np.save(output_file, summary_matrix)

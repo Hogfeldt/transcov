@@ -5,6 +5,7 @@ import attr
 from .bam import BAM
 from .utils import write_matrix_and_index_file
 
+
 @attr.s
 class BED:
     chrom = attr.ib()
@@ -18,12 +19,15 @@ class BED:
 def load_bed_file(file_path):
     bed_list = list()
     with open(file_path) as fp:
-        reader = csv.reader(fp, delimiter='\t')
+        reader = csv.reader(fp, delimiter="\t")
         for line in reader:
-            if line[0].startswith('#'):
+            if line[0].startswith("#"):
                 continue
-            bed_list.append(BED(line[0], int(line[1]), int(line[2]), line[3], int(line[4]), line[5]))
+            bed_list.append(
+                BED(line[0], int(line[1]), int(line[2]), line[3], int(line[4]), line[5])
+            )
     return bed_list
+
 
 def calc_rel_start_and_end(read_start, read_end, strand, tss):
     rel_start = read_start - tss
@@ -39,9 +43,9 @@ def add_read_ends(A, start, end, i, k):
     a = start + k
     b = end + k
     if a >= 0 and a < m:
-        A[i,a] += 1
+        A[i, a] += 1
     if b >= 0 and b < m:
-        A[i,b] += 1
+        A[i, b] += 1
 
 
 def add_fragment(A, start, end, i, k):
@@ -57,9 +61,7 @@ def add_fragment(A, start, end, i, k):
     A[i] += v
 
 
-def generate_length_matrix(
-    bam_file, bed_file, output_file, max_length=500
-):
+def generate_length_matrix(bam_file, bed_file, output_file, max_length=500):
     """ Creates a matrix where each row represents a region from the bed file
         and the columns are read lengths from 0 to max_length.
         The size of the matrix is (n x max_length) where n is the number of regions
@@ -87,13 +89,12 @@ def generate_length_matrix(
             end = int(reading[2])
             length = abs(end - start)
             if length < max_length:
-                matrix[i,length] += 1
+                matrix[i, length] += 1
         index_lst.append((i, region.tss_id))
     write_matrix_and_index_file(output_file, matrix, index_lst)
 
-def generate_read_ends_matrix(
-    bam_file, bed_file, output_file
-):
+
+def generate_read_ends_matrix(bam_file, bed_file, output_file):
     """ Creates a matrix where each row represents a region with a TSS in the
         center of the region and the columns represents base pair positions.
         The size of the matrix is (n x m) where n is the number of regions/TSS
@@ -115,7 +116,7 @@ def generate_read_ends_matrix(
     bam = BAM(bam_file)
     index_lst = list()
     for i, region in enumerate(bed_list):
-        tss = int(region.tss_id.split('_')[-1])
+        tss = int(region.tss_id.split("_")[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             read_start = int(reading[1])
             read_end = int(reading[2])
@@ -127,9 +128,8 @@ def generate_read_ends_matrix(
         index_lst.append((i, region.tss_id))
     write_matrix_and_index_file(output_file, coverage_matrix, index_lst)
 
-def generate_coverage_matrix(
-    bam_file, bed_file, output_file
-):
+
+def generate_coverage_matrix(bam_file, bed_file, output_file):
     """ Creates a matrix where each row represents a region with a TSS in the
         center of the region and the columns represents base pair positions.
         The size of the matrix is (n x m) where n is the number of regions/TSS
@@ -151,7 +151,7 @@ def generate_coverage_matrix(
     bam = BAM(bam_file)
     index_lst = list()
     for i, region in enumerate(bed_list):
-        tss = int(region.tss_id.split('_')[-1])
+        tss = int(region.tss_id.split("_")[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             read_start = int(reading[1])
             read_end = int(reading[2])
