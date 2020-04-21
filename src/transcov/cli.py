@@ -86,3 +86,17 @@ def pick_subset(input_matrix, index_file, ids_file, output_file):
                 continue
             ids.append(line[0])
     manipulations.pick_subset(input_matrix, index_file, output_file, ids)
+
+
+@cli.command()
+@click.argument("input_matrix")
+@click.argument("index_file")
+@click.option("-o", "--output-file", default="tail_cutted_matrix.npy")
+@click.option("-c", "--cut", default=0.05, type=click.FloatRange(min=0,max=1))
+@click.option("-m", "--mode", default="both", type=click.Choice(['both','left','right'], case_sensitive=False))
+def cut_tails(input_matrix, index_file, output_file, cut, mode):
+    tail_funcs = {'both': manipulations.cut_tails_both,
+                  'left': manipulations.cut_tails_left,
+                  'right': manipulations.cut_tails_right,
+                  }
+    tail_funcs[mode](input_matrix, index_file, output_file, cut)

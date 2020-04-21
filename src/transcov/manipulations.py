@@ -25,7 +25,6 @@ def pick_subset_by_row_index(X, index_pairs, n):
         A[i] = X[j]
     return A
 
-pairing = lambda index_map, row_id: (row_id, index_map[row_id])
 
 def unzip_pair_iter(it):
     it1, it2 = tee(it)
@@ -35,6 +34,9 @@ def unzip_pair_iter(it):
 
 
 def get_id_index_pair_iters_from_ids(index_map, ids):
+
+    pairing = lambda index_map, row_id: (row_id, index_map[row_id])
+    
     pair_iter = map(partial(pairing, index_map), ids)
     ids_iter, index_iter = unzip_pair_iter(pair_iter)
     new_index_id_pairs = zip(count(), ids_iter)
@@ -92,7 +94,7 @@ def pair_inside_limits(lower, upper, pair):
     return lower < second(pair) < upper
 
 
-def get_id_index_pair_iters_from_ids(ids_map, indexs):
+def get_id_index_pair_iters_from_indexs(ids_map, indexs):
 
     pairing = lambda ids_map, index: (ids_map[index], index)
 
@@ -106,17 +108,16 @@ def get_id_index_pair_iters_from_ids(ids_map, indexs):
 def cut_tails(limit_func, matrix, index_file, output_file, cut):
     A = np.load(matrix)
     row_cov_pairs = sorted(row_coverage_pairs(A), key=second)
-    lower, upper = limit_func(row_cov_pairs, A)
-    subset_indexs = map(
+    lower, upper = limit_func(row_cov_pairs, cut)
+    subset_indexs = list(map(
         first, filter(partial(pair_inside_limits, lower, upper), row_cov_pairs)
-    )
+    ))
     ids_map = create_ids_map(index_file)
     new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters_from_indexs(
         ids_map, subset_indexs
     )
-    print(subset_indexs)
     sub_matrix = pick_subset_by_row_index(
-        matrix, new_old_index_pairs, len(subset_indexs)
+        A, new_old_index_pairs, len(subset_indexs)
     )
     write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
 
@@ -142,7 +143,7 @@ def find_limits_right_cut(row_cov_pairs, cut):
     return (lower, upper)
 
 
-def cut_tails_double(matrix, index_file, output_file, cut=0.05):
+def cut_tails_both(matrix, index_file, output_file, cut=0.05):
     """ Removes the left and right tail from the coverage distribution of the
         matrix. The cuts based on a fraction given as cut.
         If cut = 0.05 the top 5% and the bottom 5% will be removed.
@@ -157,7 +158,7 @@ def cut_tails_double(matrix, index_file, output_file, cut=0.05):
         :type cut: 0 < int < 1
         :returns:  None
     """
-    return partial(cut_tails, find_limits_double_cut)
+    cut_tails(find_limits_double_cut, matrix, index_file, output_file, cut)
 
 
 def cut_tails_left(matrix, index_file, output_file, cut=0.05):
@@ -175,7 +176,7 @@ def cut_tails_left(matrix, index_file, output_file, cut=0.05):
         :type cut: 0 < int < 1
         :returns:  None
     """
-    return partial(cut_tails, find_limits_left_cut)
+    cut_tails(find_limits_left_cut, matrix, index_file, output_file, cut)
 
 
 def cut_tails_right(matrix, index_file, output_file, cut=0.05):
@@ -193,7 +194,7 @@ def cut_tails_right(matrix, index_file, output_file, cut=0.05):
         :type cut: 0 < int < 1
         :returns:  None
     """
-    return partial(cut_tails, find_limits_right_cut)
+    cut_tails(find_limits_right_cut, matrix, index_file, output_file, cut)
 
 
 def first_true(pred_func, it):

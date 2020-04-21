@@ -65,17 +65,17 @@ class Test_collapse_integration(unittest.TestCase):
         B = np.load(self.output_matrix.name + ".npy")
         self.assertTrue(((A+A)==B).all())
 
-class Test_cut_tails_double_integration(unittest.TestCase):
+class Test_cut_tails_both_integration(unittest.TestCase):
     def setUp(self):
         self.output_matrix = tempfile.NamedTemporaryFile()
 
     def tearDown(self):
         self.output_matrix.close()
 
-    def test_cut_tails_double(self):
+    def test_cut_tails_both(self):
         matrix = join(dirname(__file__), "data/coverage_matrix.npy")
         index = join(dirname(__file__), "data/coverage_matrix.index")
-        mut.cut_tails_double(matrix, index, self.output_matrix.name)
+        mut.cut_tails_both(matrix, index, self.output_matrix.name)
         An, Am = np.load(matrix).shape
         Bn, Bm = np.load(self.output_matrix.name + ".npy").shape
         self.assertTrue(An>Bn)
