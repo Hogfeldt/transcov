@@ -25,9 +25,7 @@ def pick_subset_by_row_index(X, index_pairs, n):
         A[i] = X[j]
     return A
 
-
 pairing = lambda index_map, row_id: (row_id, index_map[row_id])
-
 
 def unzip_pair_iter(it):
     it1, it2 = tee(it)
@@ -36,7 +34,7 @@ def unzip_pair_iter(it):
     return (first_it, second_it)
 
 
-def get_id_index_pair_iters(index_map, ids):
+def get_id_index_pair_iters_from_ids(index_map, ids):
     pair_iter = map(partial(pairing, index_map), ids)
     ids_iter, index_iter = unzip_pair_iter(pair_iter)
     new_index_id_pairs = zip(count(), ids_iter)
@@ -60,9 +58,142 @@ def pick_subset(matrix_file, index_file, output_file, ids):
     """
     matrix = np.load(matrix_file)
     index_map = create_index_map(index_file)
-    new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters(index_map, ids)
+    new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters_from_ids(
+        index_map, ids
+    )
     sub_matrix = pick_subset_by_row_index(matrix, new_old_index_pairs, len(ids))
     write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
+
+
+def create_ids_map(index_file):
+    ids_map = dict()
+    with open(index_file) as fp:
+        for line in tsv_reader(fp):
+            if line[0].startswith("#"):
+                continue
+            ids_map[int(line[0])] = line[1]
+    return ids_map
+
+
+def row_cov_pair(A, i):
+    return (i, np.sum(A[i]))
+
+
+def row_coverage_pairs(A):
+    n, _ = A.shape
+    return map(partial(row_cov_pair, A), range(n))
+
+
+first = lambda pair: pair[0]
+second = lambda pair: pair[1]
+
+
+def pair_inside_limits(lower, upper, pair):
+    return lower < second(pair) < upper
+
+
+def get_id_index_pair_iters_from_ids(ids_map, indexs):
+
+    pairing = lambda ids_map, index: (ids_map[index], index)
+
+    pair_iter = map(partial(pairing, ids_map), indexs)
+    ids_iter, index_iter = unzip_pair_iter(pair_iter)
+    new_index_id_pairs = zip(count(), ids_iter)
+    new_old_index_pairs = zip(count(), index_iter)
+    return (new_index_id_pairs, new_old_index_pairs)
+
+
+def cut_tails(limit_func, matrix, index_file, output_file, cut):
+    A = np.load(matrix)
+    row_cov_pairs = sorted(row_coverage_pairs(A), key=second)
+    lower, upper = limit_func(row_cov_pairs, A)
+    subset_indexs = map(
+        first, filter(partial(pair_inside_limits, lower, upper), row_cov_pairs)
+    )
+    ids_map = create_ids_map(index_file)
+    new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters_from_indexs(
+        ids_map, subset_indexs
+    )
+    print(subset_indexs)
+    sub_matrix = pick_subset_by_row_index(
+        matrix, new_old_index_pairs, len(subset_indexs)
+    )
+    write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
+
+
+def find_limits_double_cut(row_cov_pairs, cut):
+    cut_index = int(len(row_cov_pairs) * cut)
+    lower = second(row_cov_pairs[cut_index])
+    upper = second(row_cov_pairs[-cut_index])
+    return (lower, upper)
+
+
+def find_limits_left_cut(row_cov_pairs, cut):
+    cut_index = int(len(row_cov_pairs) * cut)
+    lower = second(row_cov_pairs[cut_index])
+    upper = float("inf")
+    return (lower, upper)
+
+
+def find_limits_right_cut(row_cov_pairs, cut):
+    cut_index = int(len(row_cov_pairs) * cut)
+    lower = -1
+    upper = second(row_cov_pairs[-cut_index])
+    return (lower, upper)
+
+
+def cut_tails_double(matrix, index_file, output_file, cut=0.05):
+    """ Removes the left and right tail from the coverage distribution of the
+        matrix. The cuts based on a fraction given as cut.
+        If cut = 0.05 the top 5% and the bottom 5% will be removed.
+
+        :param matrix_file: File path to the input matrix
+        :type matrix_file: str
+        :param index_file: File path to the index file which coresponds to the input matrix
+        :type index_file: str
+        :param output_file: File path to the output matrix
+        :type output_file: str
+        :param cut: Fraction to be removed
+        :type cut: 0 < int < 1
+        :returns:  None
+    """
+    return partial(cut_tails, find_limits_double_cut)
+
+
+def cut_tails_left(matrix, index_file, output_file, cut=0.05):
+    """ Removes the left tail from the coverage distribution of the matrix. 
+        The cut is based on a fraction given as cut.
+        If cut = 0.05 the bottom 5% will be removed.
+
+        :param matrix_file: File path to the input matrix
+        :type matrix_file: str
+        :param index_file: File path to the index file which coresponds to the input matrix
+        :type index_file: str
+        :param output_file: File path to the output matrix
+        :type output_file: str
+        :param cut: Fraction to be removed
+        :type cut: 0 < int < 1
+        :returns:  None
+    """
+    return partial(cut_tails, find_limits_left_cut)
+
+
+def cut_tails_right(matrix, index_file, output_file, cut=0.05):
+    """ Removes the right tail from the coverage distribution of the matrix. 
+        The cut is based on a fraction given as cut.
+        If cut = 0.05 the top 5% will be removed.
+
+        :param matrix_file: File path to the input matrix
+        :type matrix_file: str
+        :param index_file: File path to the index file which coresponds to the input matrix
+        :type index_file: str
+        :param output_file: File path to the output matrix
+        :type output_file: str
+        :param cut: Fraction to be removed
+        :type cut: 0 < int < 1
+        :returns:  None
+    """
+    return partial(cut_tails, find_limits_right_cut)
 
 
 def first_true(pred_func, it):
@@ -120,7 +251,7 @@ def collapse(matrix_index_pairs, output_file, start=0, end=None, uint32=False):
         :param end: end index for collapsing, if None then last index is end.
         :type end: int >= 0
         :param uint32: If False numpy.dtype will be preserved, if True numpy.dtype will be changed to uint32
-        :type output_file: boolean
+        :type uint32: boolean
         :returns:  None
     """
     matrix_files, index_files = list(zip(*matrix_index_pairs))
