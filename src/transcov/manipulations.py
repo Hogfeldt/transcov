@@ -53,7 +53,7 @@ def pick_subset(matrix_file, index_file, output_file, ids):
         :param output_file: File path to the output matrix
         :type output_file: str
         :param ids: List of row identifiers for the input matrix
-        :type start: List[str]
+        :type ids: List[str]
         :returns:  None
     """
     matrix = np.load(matrix_file)
