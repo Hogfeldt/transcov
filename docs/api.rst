@@ -23,4 +23,4 @@ Manipulations
 +++++++++++++
 
 .. automodule:: transcov
-   :members: collapse, pick_subset
+   :members: collapse, pick_subset, cut_tails_left, cut_tails_right, cut_tails_both
