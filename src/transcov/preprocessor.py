@@ -87,17 +87,20 @@ def preprocess(input_file, region_size, bed_file, tss_file):
             TSS_dict[tss.tss_id].tx_ids += tss.tx_ids
         else:
             TSS_dict[tss.tss_id] = tss
-    with open(bed_file, "w") as fp:
+    with open(bed_file, "w") as fp_bed:
+        bed_writer = csv.writer(fp_bed, delimiter="\t")
+        bed_writer.writerow(["#chrom", "start", "end", "name", "score", "strand"])
         k = int(region_size / 2)
-        writer = csv.writer(fp, delimiter="\t")
-        writer.writerow(["#chrom", "start", "end", "name", "score", "strand"])
-        for tss_id in TSS_dict.keys():
-            tss = TSS_dict[tss_id]
-            writer.writerow(
-                [tss.chrom, tss.tss - k, tss.tss + k, tss_id, 0, tss.strand]
-            )
-    with open(tss_file, "w") as fp:
-        fp.write("#%s\n" % get_header())
-        for tss_id in TSS_dict.keys():
-            fp.write("%s\n" % str(TSS_dict[tss_id]))
+        with open(tss_file, "w") as fp_tss:
+            fp_tss.write("#%s\n" % get_header())
+            for tss_id in TSS_dict.keys():
+                tss = TSS_dict[tss_id]
+                region_start = tss.tss - k
+                if region_start < 0:
+                    continue
+                region_end = tss.tss + k
+                bed_writer.writerow(
+                    [tss.chrom, region_start, region_end, tss_id, 0, tss.strand]
+                )
+                fp_tss.write("%s\n" % str(TSS_dict[tss_id]))
     return (bed_file, tss_file)
