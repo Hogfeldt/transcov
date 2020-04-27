@@ -6,7 +6,7 @@ from .generator import (
 from .preprocessor import preprocess
 from .manipulations import collapse, pick_subset, cut_tails_left, cut_tails_right, cut_tails_both
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 __all__ = (
     "generate_coverage_matrix",
