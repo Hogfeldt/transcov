@@ -5,6 +5,7 @@ from .generator import (
     generate_coverage_matrix,
     generate_read_ends_matrix,
     generate_length_matrix,
+    generate_end_length_tensor,
 )
 from . import preprocessor
 from . import manipulations
@@ -52,6 +53,13 @@ def generate_read_ends(bam_file, bed_file, output_file):
 def generate_length(bam_file, bed_file, output_file, max_length):
     generate_length_matrix(bam_file, bed_file, output_file, max_length)
 
+@cli.command()
+@click.argument("bam_file")
+@click.argument("bed_file")
+@click.option("-o", "--output-file", default="end_length_tensor.npy")
+@click.option("-m", "--max-length", default=500, type=click.IntRange(min=1))
+def generate_end_length(bam_file, bed_file, output_file, max_length):
+    generate_end_length_tensor(bam_file, bed_file, output_file, max_length)
 
 @cli.command()
 @click.argument("matrices", nargs=-1)

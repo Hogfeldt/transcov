@@ -60,6 +60,47 @@ def add_fragment(A, start, end, i, k):
     v[a:b] = 1
     A[i] += v
 
+def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
+    """ Creates a tensor where each matrix represents a region from the bed file,
+        the matrix columns are read lengths from 0 to max_length and rows are 
+        bp positions in the region.
+        The size of the tensor is (n x region_size x max_length) where n is the number 
+        of regions in the bed file.
+        Data is read length counts, so that a_nij is the number of reads in region n, 
+        postion i with length j.
+
+        :param bam_file: File path to the bam sample file
+        :type bam_file: str
+        :param bed_file: File path to the bed file, which can be compiled by the preprocessing function
+        :type bed_file: str
+        :param output_file: File path to the output file
+        :type output_file: str
+        :param max_length: Maximum read length to be counted
+        :type max_length: int > 0
+        :returns:  None
+    """
+    bed_list = load_bed_file(bed_file)
+    region_size = bed_list[0].end - bed_list[0].start
+    matrix = np.zeros((len(bed_list), region_size, max_length), dtype=np.uint16)
+    bam = BAM(bam_file)
+    index_lst = list()
+    for n, region in enumerate(bed_list):
+        tss = int(region.tss_id.split("_")[-1])
+        for reading in bam.pair_generator(region.chrom, region.start, region.end):
+            start = int(reading[1])
+            end = int(reading[2])
+            length = abs(end - start)
+            if length < max_length:
+                rel_start, rel_end = calc_rel_start_and_end(
+                    start, end, region.strand, tss
+                )
+                k = tss - region.start
+                _, i, _ = matrix.shape
+                a = rel_start + k
+                if i >= 0 and a < i:
+                    matrix[n, a, length] += 1
+        index_lst.append((i, region.tss_id))
+    write_matrix_and_index_file(output_file, matrix, index_lst)
 
 def generate_length_matrix(bam_file, bed_file, output_file, max_length=500):
     """ Creates a matrix where each row represents a region from the bed file
