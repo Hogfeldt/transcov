@@ -84,7 +84,7 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
     matrix = np.zeros((len(bed_list), region_size, max_length), dtype=np.uint16)
     bam = BAM(bam_file)
     index_lst = list()
-    for n, region in enumerate(bed_list):
+    for region_index, region in enumerate(bed_list):
         tss = int(region.tss_id.split("_")[-1])
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             start = int(reading[1])
@@ -94,12 +94,10 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
                 rel_start, rel_end = calc_rel_start_and_end(
                     start, end, region.strand, tss
                 )
-                k = tss - region.start
-                _, i, _ = matrix.shape
-                a = rel_start + k
-                if i >= 0 and a < i:
-                    matrix[n, a, length] += 1
-        index_lst.append((i, region.tss_id))
+                bp_index = rel_start + (tss - region.start)
+                if bp_index >= 0 and bp_index < region_size:
+                    matrix[region_index, bp_index, length] += 1
+        index_lst.append((region_index, region.tss_id))
     write_matrix_and_index_file(output_file, matrix, index_lst)
 
 def generate_length_matrix(bam_file, bed_file, output_file, max_length=500):
