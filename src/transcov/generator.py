@@ -62,12 +62,12 @@ def add_fragment(A, start, end, i, k):
 
 def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
     """ Creates a tensor where each matrix represents a region from the bed file,
-        the matrix columns are read lengths from 0 to max_length and rows are 
-        bp positions in the region.
-        The size of the tensor is (n x region_size x max_length) where n is the number 
+        the matrix columns are bp positions in the region and rows are are lengths
+        from 0 to max_length.
+        The size of the tensor is (n x max_length x region_size) where n is the number 
         of regions in the bed file.
         Data is read length counts, so that a_nij is the number of reads in region n, 
-        postion i with length j.
+        length i with position j.
 
         :param bam_file: File path to the bam sample file
         :type bam_file: str
@@ -81,7 +81,7 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
     """
     bed_list = load_bed_file(bed_file)
     region_size = bed_list[0].end - bed_list[0].start
-    matrix = np.zeros((len(bed_list), region_size, max_length), dtype=np.uint16)
+    matrix = np.zeros((len(bed_list), max_length, region_size), dtype=np.uint16)
     bam = BAM(bam_file)
     index_lst = list()
     for region_index, region in enumerate(bed_list):
@@ -96,7 +96,7 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
                 )
                 bp_index = rel_start + (tss - region.start)
                 if bp_index >= 0 and bp_index < region_size:
-                    matrix[region_index, bp_index, length] += 1
+                    matrix[region_index, length, bp_index] += 1
         index_lst.append((region_index, region.tss_id))
     write_matrix_and_index_file(output_file, matrix, index_lst)
 
