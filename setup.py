@@ -19,6 +19,9 @@ setup(
         "numpy",  # 1.18.1
         "attrs",  # 19.3.0
         "click>=7.0",
+        "pandas", # 1.0.3
+        "matplotlib",   #3.2.1
+        "seaborn",      #0.10.1
     ],
     entry_points={"console_scripts": ["transcov = transcov.cli:cli"],},
     include_package_data=True,
