@@ -6,6 +6,7 @@ from .generator import (
 )
 from .preprocessor import preprocess
 from .manipulations import collapse, pick_subset, cut_tails_left, cut_tails_right, cut_tails_both
+from .plotter import plot_end_length_frag_start_dist, plot_coverage_distribution
 
 __version__ = "1.0.7"
 
@@ -20,4 +21,6 @@ __all__ = (
     "cut_tails_both",
     "cut_tails_right",
     "cut_tails_both",
+    "plot_end_length_frag_start_dist", 
+    "plot_coverage_distribution",
 )

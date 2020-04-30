@@ -9,6 +9,7 @@ from .generator import (
 )
 from . import preprocessor
 from . import manipulations
+from . import plotter
 from .utils import tsv_reader, determine_index_file_name
 
 
@@ -108,3 +109,16 @@ def cut_tails(input_matrix, index_file, output_file, cut, mode):
                   'right': manipulations.cut_tails_right,
                   }
     tail_funcs[mode](input_matrix, index_file, output_file, cut)
+
+@cli.command()
+@click.argument("input_tensor")
+@click.argument("index_file")
+@click.option("-o", "--output-file", default="plot.png")
+def plot_tensor_dist(input_tensor, index_file, output_file):
+    plotter.plot_end_length_frag_start_dist(input_tensor, index_file, output_file)
+
+@cli.command()
+@click.argument("input_matrix")
+@click.option("-o", "--output-file", default="coverage_distribution.png")
+def plot_coverage_dist(input_matrix, output_file):
+    plotter.plot_coverage_distribution(input_matrix, output_file)
