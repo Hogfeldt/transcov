@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import attr
+from scipy.sparse import csr_matrix, lil_matrix
 
 from .bam import BAM
 from .utils import write_matrix_and_index_file
@@ -81,11 +82,12 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
     """
     bed_list = load_bed_file(bed_file)
     region_size = bed_list[0].end - bed_list[0].start
-    matrix = np.zeros((len(bed_list), max_length, region_size), dtype=np.uint16)
     bam = BAM(bam_file)
     index_lst = list()
+    matrix_lst = list()
     for region_index, region in enumerate(bed_list):
         tss = int(region.tss_id.split("_")[-1])
+        region_matrix = lil_matrix((max_length, region_size), dtype=np.uint16)
         for reading in bam.pair_generator(region.chrom, region.start, region.end):
             start = int(reading[1])
             end = int(reading[2])
@@ -96,9 +98,11 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
                 )
                 bp_index = rel_start + (tss - region.start)
                 if bp_index >= 0 and bp_index < region_size:
-                    matrix[region_index, length, bp_index] += 1
+                    region_matrix[length, bp_index] += 1
+        matrix_lst.append(csr_matrix(region_matrix))
         index_lst.append((region_index, region.tss_id))
-    write_matrix_and_index_file(output_file, matrix, index_lst)
+    tensor = np.array(matrix_lst)
+    write_matrix_and_index_file(output_file, tensor, index_lst)
 
 def generate_length_matrix(bam_file, bed_file, output_file, max_length=500):
     """ Creates a matrix where each row represents a region from the bed file

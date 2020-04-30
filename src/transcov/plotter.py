@@ -42,21 +42,20 @@ def create_interval_labels(start, stop, steps):
     right_interval = left_interval[1:] + [stop]
     return (f'{a}-{b}' for a,b in zip(left_interval, right_interval))
 
-def plot_end_length_frag_start_dist(tensor_file, index_file, output_file):
-    tensor = np.load(tensor_file)
-    tss_ids = fetch_tss_ids(index_file)
-    matrix = np.add.reduce(tensor, axis=0)
+def plot_end_length_frag_start_dist(tensor_file, output_file):
+    tensor = np.load(tensor_file, allow_pickle=True)
+    matrix = np.add.reduce(tensor, axis=0).toarray()
     n, m = matrix.shape
     column_bin_size = math.ceil(m / 67)
     row_bin_size = math.ceil(n / 50)
     matrix = bin_rows_by_sum(bin_columns_by_sum(matrix, column_bin_size), row_bin_size)
-    df = pd.DataFrame(
+    matrix = pd.DataFrame(
         matrix,
         index=create_interval_labels(0, n, row_bin_size),
         columns=create_interval_labels(0, m, column_bin_size),
     )
     sns.set(rc={"figure.figsize": (20.0, 12.27)})
-    ax = sns.heatmap(df)
+    ax = sns.heatmap(matrix)
     ax.collections[0].colorbar.set_label("counts")
     plt.xlabel("bp-position")
     plt.ylabel("Fragment length/bp")

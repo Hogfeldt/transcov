@@ -112,10 +112,9 @@ def cut_tails(input_matrix, index_file, output_file, cut, mode):
 
 @cli.command()
 @click.argument("input_tensor")
-@click.argument("index_file")
 @click.option("-o", "--output-file", default="plot.png")
-def plot_tensor_dist(input_tensor, index_file, output_file):
-    plotter.plot_end_length_frag_start_dist(input_tensor, index_file, output_file)
+def plot_tensor_dist(input_tensor, output_file):
+    plotter.plot_end_length_frag_start_dist(input_tensor, output_file)
 
 @cli.command()
 @click.argument("input_matrix")

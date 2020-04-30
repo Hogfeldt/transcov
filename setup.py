@@ -22,6 +22,7 @@ setup(
         "pandas", # 1.0.3
         "matplotlib",   #3.2.1
         "seaborn",      #0.10.1
+        "scipy",    #1.4.1
     ],
     entry_points={"console_scripts": ["transcov = transcov.cli:cli"],},
     include_package_data=True,
