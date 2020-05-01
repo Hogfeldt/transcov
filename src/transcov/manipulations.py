@@ -20,8 +20,12 @@ def create_index_map(index_file):
 
 
 def pick_subset_by_row_index(X, index_pairs, n):
-    _, m = X.shape
-    A = np.zeros((n, m), dtype=X.dtype)
+    is_tensor = len(X.shape) == 1
+    if is_tensor:
+        A = np.zeros(n, dtype=object)
+    else:
+        _, m = X.shape
+        A = np.zeros((n, m), dtype=X.dtype)
     for i, j in index_pairs:
         A[i] = X[j]
     return A
@@ -45,12 +49,12 @@ def get_id_index_pair_iters_from_ids(index_map, ids):
     return (new_index_id_pairs, new_old_index_pairs)
 
 
-def pick_subset(matrix_file, index_file, output_file, ids):
-    """ Given a matrix and a list of row identifiers, create a 
-        new matrix which is a row-wise subset of the given matrix.
+def pick_subset(sample_file, index_file, output_file, ids):
+    """ Given a matrix/tensor and a list of row identifiers, create a 
+        new matrix/tensor which is a row-wise subset of the given matrix/tensor.
 
-        :param matrix_file: File path to the input matrix
-        :type matrix_file: str
+        :param sample_file: File path to the input sample
+        :type sample_file: str
         :param index_file: File path to the index file which coresponds to the input matrix
         :type index_file: str
         :param output_file: File path to the output matrix
@@ -59,13 +63,13 @@ def pick_subset(matrix_file, index_file, output_file, ids):
         :type ids: List[str]
         :returns:  None
     """
-    matrix = np.load(matrix_file)
+    sample = np.load(sample_file, allow_pickle=True)
     index_map = create_index_map(index_file)
     new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters_from_ids(
         index_map, ids
     )
-    sub_matrix = pick_subset_by_row_index(matrix, new_old_index_pairs, len(ids))
-    write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
+    sub_sample = pick_subset_by_row_index(sample, new_old_index_pairs, len(ids))
+    write_matrix_and_index_file(output_file, sub_sample, new_index_id_pairs)
 
 
 def create_ids_map(index_file):
