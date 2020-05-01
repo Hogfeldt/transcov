@@ -2,8 +2,9 @@ import argparse
 import numpy as np
 import filecmp
 from shutil import copyfile
-from functools import partial
+from functools import partial, reduce
 from itertools import tee, count
+from operator import add
 
 from .utils import tsv_reader, write_matrix_and_index_file, determine_index_file_name
 
@@ -36,7 +37,7 @@ def unzip_pair_iter(it):
 def get_id_index_pair_iters_from_ids(index_map, ids):
 
     pairing = lambda index_map, row_id: (row_id, index_map[row_id])
-    
+
     pair_iter = map(partial(pairing, index_map), ids)
     ids_iter, index_iter = unzip_pair_iter(pair_iter)
     new_index_id_pairs = zip(count(), ids_iter)
@@ -109,16 +110,14 @@ def cut_tails(limit_func, matrix, index_file, output_file, cut):
     A = np.load(matrix)
     row_cov_pairs = sorted(row_coverage_pairs(A), key=second)
     lower, upper = limit_func(row_cov_pairs, cut)
-    subset_indexs = list(map(
-        first, filter(partial(pair_inside_limits, lower, upper), row_cov_pairs)
-    ))
+    subset_indexs = list(
+        map(first, filter(partial(pair_inside_limits, lower, upper), row_cov_pairs))
+    )
     ids_map = create_ids_map(index_file)
     new_index_id_pairs, new_old_index_pairs = get_id_index_pair_iters_from_indexs(
         ids_map, subset_indexs
     )
-    sub_matrix = pick_subset_by_row_index(
-        A, new_old_index_pairs, len(subset_indexs)
-    )
+    sub_matrix = pick_subset_by_row_index(A, new_old_index_pairs, len(subset_indexs))
     write_matrix_and_index_file(output_file, sub_matrix, new_index_id_pairs)
 
 
@@ -218,45 +217,67 @@ def assert_index_files_are_identical(index_files):
     return ground_truth
 
 
-def sum_matrices(matrices, start, end, uint32):
-    summary_matrix = np.load(matrices[0])
-    if end == None:
-        _, end = summary_matrix.shape
-    summary_matrix = summary_matrix[:, start:end]
-    if uint32 == True:
-        dtype = np.uint32
-        summary_matrix = summary_matrix.astype(dtype)
+def sum_samples(load_func, samples):
+    return reduce(add, map(load_func, samples))
+
+
+def load_matrix_and_change_dtype(matrix, dtype=np.uint32):
+    return np.load(matrix).astype(dtype)
+
+
+def collapse_matrices(matrices, dtype, uint32=False):
+    if uint32 and dtype != np.uint32:
+        load_func = load_matrix_and_change_dtype
     else:
-        dtype = summary_matrix.dtype
-    if len(matrices) > 1:
-        for input_file in matrices[1:]:
-            A = np.load(input_file).astype(dtype)[:, start:end]
-            summary_matrix += A
-    return summary_matrix
+        load_func = np.load
+    return sum_samples(load_func, matrices)
 
 
-def collapse(matrix_index_pairs, output_file, start=0, end=None, uint32=False):
-    """ This function will given a list matrix-index pairs, load in the matrices one by
-        one and collapse them upon each other value by value.
-        The final matrix will be stored in the output file as a .npy file, with a 
+def load_tensor_and_change_dtype(tensor, dtype=np.uint32):
+    T = np.load(tensor, allow_pickle=True)
+    for i in range(len(T)):
+        T[i] = T[i].astype(dtype)
+    return T
+
+
+def collapse_tensors(tensors, dtype, uint32=False):
+    if uint32 and dtype != np.uint32:
+        load_func = load_tensor_and_change_dtype
+    else:
+        load_func = partial(np.load, allow_pickle=True)
+    return sum_samples(load_func, tensors)
+
+
+def determine_structure_and_dtype(sample_file):
+    sample = np.load(sample_file, allow_pickle=True)
+    is_tensor = len(sample.shape) == 1
+    if is_tensor:
+        dtype = sample[0].dtype
+    else:
+        dtype = sample.dtype
+    return (is_tensor, dtype)
+
+
+def collapse(sample_pairs, output_file, uint32=False):
+    """ This function will given a list matrix-index pairs or tensor-index paris, 
+        load in the samples one by one and collapse them upon each other value by value.
+        The final sample will be stored in the output file as a .npy file, with a 
         corresponding index file.
 
-        Use start and end if you want to only collapse and output a certain region.
-
-        :param matrix_index_pairs: List of pairs (file path to matrix, file path index file)
+        :param sample_pairs: List of pairs (file path to matrix/tensor, file path index file)
         :type matrices: List((str,str))
         :param output_file: File path to the output file
         :type output_file: str
-        :param start: start index for collapsing
-        :type start: int >= 0
-        :param end: end index for collapsing, if None then last index is end.
-        :type end: int >= 0
         :param uint32: If False numpy.dtype will be preserved, if True numpy.dtype will be changed to uint32
         :type uint32: boolean
         :returns:  None
     """
-    matrix_files, index_files = list(zip(*matrix_index_pairs))
+    sample_files, index_files = list(zip(*sample_pairs))
     index_file = assert_index_files_are_identical(index_files)
-    summary_matrix = sum_matrices(matrix_files, start, end, uint32)
+    is_tensor, dtype = determine_structure_and_dtype(sample_files[0])
+    if is_tensor:
+        summary_sample = collapse_tensors(sample_files, dtype, uint32)
+    else:
+        summary_sample = collapse_matrices(sample_files, dtype, uint32)
     copyfile(index_file, determine_index_file_name(output_file))
-    np.save(output_file, summary_matrix)
+    np.save(output_file, summary_sample)

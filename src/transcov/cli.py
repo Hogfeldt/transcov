@@ -64,11 +64,9 @@ def generate_end_length(bam_file, bed_file, output_file, max_length):
 
 @cli.command()
 @click.argument("matrices", nargs=-1)
-@click.option("-o", "--output-file", default="collapsed_matrix.npy")
-@click.option("-s", "--start", default=0, type=click.IntRange(min=0))
-@click.option("-e", "--end", default=None, type=int)
+@click.option("-o", "--output-file", default="collapsed_sample.npy")
 @click.option("--uint32", is_flag=True)
-def collapse(matrices, output_file, start, end, uint32):
+def collapse(matrices, output_file, uint32):
     if len(matrices) > 0:
 
         def isfile_or_none(file_path):
@@ -78,8 +76,7 @@ def collapse(matrices, output_file, start, end, uint32):
                 return None
 
         indexes = map(isfile_or_none, map(determine_index_file_name, matrices))
-        print(indexes)
-        manipulations.collapse(zip(matrices, indexes), output_file, start, end, uint32)
+        manipulations.collapse(zip(matrices, indexes), output_file, uint32)
 
 
 @cli.command()
