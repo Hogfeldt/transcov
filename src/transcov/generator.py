@@ -61,6 +61,7 @@ def add_fragment(A, start, end, i, k):
     v[a:b] = 1
     A[i] += v
 
+
 def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
     """ Creates a tensor where each matrix represents a region from the bed file,
         the matrix columns are bp positions in the region and rows are are lengths
@@ -103,6 +104,7 @@ def generate_end_length_tensor(bam_file, bed_file, output_file, max_length):
         index_lst.append((region_index, region.tss_id))
     tensor = np.array(matrix_lst)
     write_matrix_and_index_file(output_file, tensor, index_lst)
+
 
 def generate_length_matrix(bam_file, bed_file, output_file, max_length=500):
     """ Creates a matrix where each row represents a region from the bed file
