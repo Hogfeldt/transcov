@@ -42,24 +42,38 @@ def create_interval_labels(start, stop, steps):
     right_interval = left_interval[1:] + [stop]
     return (f'{a}-{b}' for a,b in zip(left_interval, right_interval))
 
+def plot_indecies(matrix, start, end):
+    sns.set(rc={"figure.figsize": (100.0, 40.27)})
+    ax = sns.heatmap(matrix[start:end])
+    ax.collections[0].colorbar.set_label("counts")
+    plt.xlabel("bp-position")
+    plt.ylabel("Fragment length/bp")
+    plt.savefig(output_file + f'{start}_{end}')
+
 def plot_end_length_frag_start_dist(tensor_file, output_file):
     tensor = np.load(tensor_file, allow_pickle=True)
     matrix = np.add.reduce(tensor, axis=0).toarray()
     n, m = matrix.shape
-    column_bin_size = math.ceil(m / 67)
-    row_bin_size = math.ceil(n / 50)
+    column_bin_size = math.ceil(m / 340)
+    row_bin_size = math.ceil(n / 100)
     matrix = bin_rows_by_sum(bin_columns_by_sum(matrix, column_bin_size), row_bin_size)
     matrix = pd.DataFrame(
         matrix,
         index=create_interval_labels(0, n, row_bin_size),
         columns=create_interval_labels(0, m, column_bin_size),
     )
-    sns.set(rc={"figure.figsize": (20.0, 12.27)})
-    ax = sns.heatmap(matrix)
+    sns.set(rc={"figure.figsize": (100.0, 40.27)})
+    ax = sns.heatmap(matrix[:44])
     ax.collections[0].colorbar.set_label("counts")
     plt.xlabel("bp-position")
     plt.ylabel("Fragment length/bp")
-    plt.savefig(output_file)
+    plt.savefig(output_file + f'first.png')
+    plt.clf()
+    ax = sns.heatmap(matrix[44:])
+    ax.collections[0].colorbar.set_label("counts")
+    plt.xlabel("bp-position")
+    plt.ylabel("Fragment length/bp")
+    plt.savefig(output_file + f'last.png')
 
 
 def plot_coverage_distribution(matrix_file, output_file):
