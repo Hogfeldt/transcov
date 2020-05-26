@@ -1,7 +1,7 @@
 #########################################################
 ##  This class is based on the work of Tobias Røikjer, ##
-##  the code is taken from his Github Repository NucCa ##
-##  (https://github.com/TobiasRoikjer/NucCa)           ##
+##  parts of code is taken from his Github Repository  ##
+##  NucCa (https://github.com/TobiasRoikjer/NucCa)     ##
 #########################################################
 import pysam
 import os
@@ -28,11 +28,13 @@ class BAM:
             contig=chrom, start=region_start, stop=region_end
         ):
             if (
-                not read.is_paired
-                or read.is_duplicate
+                read.is_duplicate
                 or read.is_secondary
                 or read.is_supplementary
             ):
+                continue
+            elif not read.is_paired:
+                yield read.reference_name, read.reference_start, read.reference_end
                 continue
 
             query_name = read.query_name
