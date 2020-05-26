@@ -62,22 +62,20 @@ def generate_length(bam_file, bed_file, output_file, max_length):
 def generate_end_length(bam_file, bed_file, output_file, max_length):
     generate_end_length_tensor(bam_file, bed_file, output_file, max_length)
 
+def isfile_or_none(file_path):
+    if isfile(file_path):
+        return file_path
+    else:
+        return None
+
 @cli.command()
 @click.argument("matrices", nargs=-1)
 @click.option("-o", "--output-file", default="collapsed_sample.npy")
 @click.option("--uint32", is_flag=True)
 def collapse(matrices, output_file, uint32):
     if len(matrices) > 0:
-
-        def isfile_or_none(file_path):
-            if isfile(file_path):
-                return file_path
-            else:
-                return None
-
         indexes = map(isfile_or_none, map(determine_index_file_name, matrices))
         manipulations.collapse(zip(matrices, indexes), output_file, uint32)
-
 
 @cli.command()
 @click.argument("input_sample")
@@ -109,9 +107,15 @@ def cut_tails(input_matrix, index_file, output_file, cut, mode):
 
 @cli.command()
 @click.argument("input_tensor")
-@click.option("-o", "--output-file", default="plot.png")
+@click.option("-o", "--output-file", default="tensor_plot.png")
 def plot_tensor_dist(input_tensor, output_file):
     plotter.plot_end_length_frag_start_dist(input_tensor, output_file)
+
+@cli.command()
+@click.argument("input_tensors", nargs=-1)
+@click.option("-o", "--output-file", default="tensor_diff_plot.png")
+def plot_tensor_dist_diff(input_tensors, output_file):
+    plotter.plot_end_length_frag_start_dist_diff(input_tensors, output_file)
 
 @cli.command()
 @click.argument("input_matrix")
