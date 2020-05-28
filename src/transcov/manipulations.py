@@ -87,7 +87,7 @@ def row_cov_pair(A, i):
 
 
 def row_coverage_pairs(A):
-    n, _ = A.shape
+    n = A.shape[0]
     return map(partial(row_cov_pair, A), range(n))
 
 
@@ -111,7 +111,7 @@ def get_id_index_pair_iters_from_indexs(ids_map, indexs):
 
 
 def cut_tails(limit_func, matrix, index_file, output_file, cut):
-    A = np.load(matrix)
+    A = np.load(matrix, allow_pickle=True)
     row_cov_pairs = sorted(row_coverage_pairs(A), key=second)
     lower, upper = limit_func(row_cov_pairs, cut)
     subset_indexs = list(
