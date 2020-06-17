@@ -33,6 +33,47 @@ class BAM:
                 or read.is_supplementary
             ):
                 continue
+
+            query_name = read.query_name
+
+            if query_name not in mem:
+                mem[query_name] = (read.reference_start, read.reference_end, read.is_reverse)
+            else:
+                mem_start, mem_end, mem_reverse = mem[query_name]
+                del mem[query_name]
+                if (
+                    mem_start is None
+                    or mem_end is None
+                    or read.reference_start is None
+                    or read.reference_end is None
+                    or read.is_reverse == mem_reverse
+                ):
+                    continue
+                if read.is_reverse:
+                    start = mem_start
+                    end = read.reference_end
+                else:
+                    start = read.reference_start
+                    end = mem_end
+
+                assert start < end
+                #start = min(read.reference_start, mem_start)
+                #end = max(read.reference_end, mem_end)
+
+                yield read.reference_name, start, end
+
+    def pair_generator_gabriel(self, chrom, region_start, region_end):
+        mem = {}
+
+        for read in self.bam_file.fetch(
+            contig=chrom, start=region_start, stop=region_end
+        ):
+            if (
+                read.is_duplicate
+                or read.is_secondary
+                or read.is_supplementary
+            ):
+                continue
             elif not read.is_paired:
                 yield read.reference_name, read.reference_start, read.reference_end
                 continue
