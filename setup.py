@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="transcov",
-    version="1.1.3",
+    version="1.1.4",
     author="Per Høgfeldt",
     description="A software for mapping coverage around transcription start sites",
     long_description=long_description,
