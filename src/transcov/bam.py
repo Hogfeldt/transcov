@@ -56,7 +56,7 @@ class BAM:
                     start = read.reference_start
                     end = mem_end
 
-                if start < end:
+                if start > end:
                     continue
                 #start = min(read.reference_start, mem_start)
                 #end = max(read.reference_end, mem_end)
